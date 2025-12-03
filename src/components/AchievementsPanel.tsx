@@ -13,7 +13,6 @@ interface Achievement {
 interface Stats {
   totalRolls: number;
   highestRoll: number;
-  lowestRoll: number;
   sumOfRolls: number;
 }
 
@@ -87,12 +86,6 @@ export const AchievementsPanel = ({
               <div className="text-xs text-muted-foreground">Highest</div>
               <div className="font-mono text-lg font-bold text-green-500">
                 {stats.highestRoll > 0 ? stats.highestRoll : "-"}
-              </div>
-            </div>
-            <div className="bg-secondary/50 rounded-lg p-3 border border-border/30 col-span-2">
-              <div className="text-xs text-muted-foreground">Lowest</div>
-              <div className="font-mono text-lg font-bold text-red-500">
-                {stats.lowestRoll < 101 ? stats.lowestRoll : "-"}
               </div>
             </div>
           </div>

@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 interface GameStats {
   totalRolls: number;
   highestRoll: number;
-  lowestRoll: number;
   sumOfRolls: number;
 }
 
@@ -26,7 +25,6 @@ const STORAGE_KEY = "d100-roller-state";
 const DEFAULT_STATS: GameStats = {
   totalRolls: 0,
   highestRoll: 0,
-  lowestRoll: 101,
   sumOfRolls: 0,
 };
 
@@ -84,7 +82,6 @@ export const useGameState = () => {
       const newStats: GameStats = {
         totalRolls: prev.stats.totalRolls + 1,
         highestRoll: Math.max(prev.stats.highestRoll, roll),
-        lowestRoll: Math.min(prev.stats.lowestRoll, roll),
         sumOfRolls: prev.stats.sumOfRolls + roll,
       };
 
