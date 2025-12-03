@@ -3,11 +3,12 @@ import { gridPatterns, type GridPattern } from "../data/gridPatterns";
 
 interface DiceGridProps {
   items: boolean[];
-  phase: "idle" | "random" | "sorting" | "sorted";
+  phase: "idle" | "random" | "sorting" | "sorted" | "applying-effects" | "effects-complete";
   onClick?: () => void;
+  thirdColumnEnabled?: boolean;
 }
 
-export const DiceGrid = ({ items, phase, onClick }: DiceGridProps) => {
+export const DiceGrid = ({ items, phase, onClick, thirdColumnEnabled = false }: DiceGridProps) => {
   // Create sorted indices - falses first, then trues
   const sortedIndices = items
     .map((hasDot, originalIndex) => ({ hasDot, originalIndex }))
@@ -24,6 +25,15 @@ export const DiceGrid = ({ items, phase, onClick }: DiceGridProps) => {
     return sortedIndices.find((s) => s.originalIndex === originalIndex)?.sortedPosition ?? originalIndex;
   };
 
+  // Check if an item matches the thirdColumn pattern
+  const isPatternMatch = (originalIndex: number): boolean => {
+    if (!thirdColumnEnabled) return false;
+    if (!items[originalIndex]) return false;
+    
+    const sortedPosition = getSortedIndex(originalIndex);
+    return gridPatterns.thirdColumn.mask[sortedPosition] === 1;
+  };
+
   const shuffleX = (Math.random() - 0.5) * 10;
   const shuffleY = (Math.random() - 0.5) * 10;
   const shuffleR = (Math.random() - 0.5) * 5;
@@ -32,7 +42,7 @@ export const DiceGrid = ({ items, phase, onClick }: DiceGridProps) => {
     <div className="p-2">
       <div
         className="relative w-full max-w-lg mx-auto cursor-pointer"
-        onClick={onClick && (phase === "idle" || phase === "sorted") ? onClick : undefined}
+        onClick={onClick && (phase === "idle" || phase === "sorted" || phase === "effects-complete") ? onClick : undefined}
       >
         <div
           className={`absolute inset-0 ${phase === "random" ? "animate-shuffle" : ""}`}
@@ -51,18 +61,20 @@ export const DiceGrid = ({ items, phase, onClick }: DiceGridProps) => {
             "--shuffle-r": `${shuffleR}deg`,
           } as React.CSSProperties}
         />
-        <div
-          className={`absolute inset-0 ${phase === "random" ? "animate-shuffle" : ""}`}
-          style={{
-            backgroundImage: `url("${gridPatterns.thirdColumn.svg}")`,
-            backgroundSize: '100% 100%',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            "--shuffle-x": `${shuffleX}px`,
-            "--shuffle-y": `${shuffleY}px`,
-            "--shuffle-r": `0deg`,
-          } as React.CSSProperties}
-        />
+        {thirdColumnEnabled && (
+          <div
+            className={`absolute inset-0 ${phase === "random" ? "animate-shuffle" : ""}`}
+            style={{
+              backgroundImage: `url("${gridPatterns.thirdColumn.svg}")`,
+              backgroundSize: '100% 100%',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              "--shuffle-x": `${shuffleX}px`,
+              "--shuffle-y": `${shuffleY}px`,
+              "--shuffle-r": `0deg`,
+            } as React.CSSProperties}
+          />
+        )}
         <div className={`grid grid-cols-10 gap-1 sm:gap-1.5 relative ${phase === "random" ? "animate-shuffle" : ""}`}
           style={{
             "--shuffle-x": `${shuffleX}px`,
@@ -77,6 +89,7 @@ export const DiceGrid = ({ items, phase, onClick }: DiceGridProps) => {
               index={index}
               phase={phase === "idle" ? "sorted" : phase}
               sortedIndex={getSortedIndex(index)}
+              isPatternMatch={isPatternMatch(index)}
             />
           ))}
         </div>
