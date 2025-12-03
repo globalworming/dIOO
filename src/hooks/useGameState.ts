@@ -72,6 +72,7 @@ const saveState = (state: GameState) => {
 
 export const useGameState = () => {
   const [state, setState] = useState<GameState>(loadState);
+  const [newlyUnlocked, setNewlyUnlocked] = useState<Achievement[]>([]);
 
   useEffect(() => {
     saveState(state);
@@ -87,6 +88,7 @@ export const useGameState = () => {
         sumOfRolls: prev.stats.sumOfRolls + roll,
       };
 
+      const unlocked: Achievement[] = [];
       const newAchievements = prev.achievements.map(ach => {
         if (ach.unlocked) return ach;
         
@@ -101,25 +103,38 @@ export const useGameState = () => {
         if (ach.id === "sum-10000" && newStats.sumOfRolls >= 10000) shouldUnlock = true;
 
         if (shouldUnlock) {
-          return { ...ach, unlocked: true, unlockedAt: Date.now() };
+          const unlockedAch = { ...ach, unlocked: true, unlockedAt: Date.now() };
+          unlocked.push(unlockedAch);
+          return unlockedAch;
         }
         return ach;
       });
+
+      if (unlocked.length > 0) {
+        setNewlyUnlocked(unlocked);
+      }
 
       return { history: newHistory, stats: newStats, achievements: newAchievements };
     });
   }, []);
 
+  const clearNewlyUnlocked = useCallback(() => {
+    setNewlyUnlocked([]);
+  }, []);
+
   const resetProgress = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setState({ history: [], stats: DEFAULT_STATS, achievements: [...DEFAULT_ACHIEVEMENTS] });
+    setNewlyUnlocked([]);
   }, []);
 
   return {
     history: state.history,
     stats: state.stats,
     achievements: state.achievements,
+    newlyUnlocked,
     addRoll,
+    clearNewlyUnlocked,
     resetProgress,
   };
 };
