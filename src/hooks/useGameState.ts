@@ -36,6 +36,9 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: "ten-rolls", name: "Getting Started", description: "Roll 10 times", unlocked: false },
   { id: "fifty-rolls", name: "Dedicated Roller", description: "Roll 50 times", unlocked: false },
   { id: "hundred-rolls", name: "Century Club", description: "Roll 100 times", unlocked: false },
+  { id: "sum-100", name: "First Hundred", description: "Total sum reaches 100", unlocked: false },
+  { id: "sum-1000", name: "Thousandaire", description: "Total sum reaches 1,000", unlocked: false },
+  { id: "sum-10000", name: "Ten Grand", description: "Total sum reaches 10,000", unlocked: false },
 ];
 
 const loadState = (): GameState => {
@@ -93,6 +96,9 @@ export const useGameState = () => {
         if (ach.id === "ten-rolls" && newStats.totalRolls >= 10) shouldUnlock = true;
         if (ach.id === "fifty-rolls" && newStats.totalRolls >= 50) shouldUnlock = true;
         if (ach.id === "hundred-rolls" && newStats.totalRolls >= 100) shouldUnlock = true;
+        if (ach.id === "sum-100" && newStats.sumOfRolls >= 100) shouldUnlock = true;
+        if (ach.id === "sum-1000" && newStats.sumOfRolls >= 1000) shouldUnlock = true;
+        if (ach.id === "sum-10000" && newStats.sumOfRolls >= 10000) shouldUnlock = true;
 
         if (shouldUnlock) {
           return { ...ach, unlocked: true, unlockedAt: Date.now() };

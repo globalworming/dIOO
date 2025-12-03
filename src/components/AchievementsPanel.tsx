@@ -76,6 +76,10 @@ export const AchievementsPanel = ({
               <div className="font-mono text-lg font-bold">{stats.totalRolls}</div>
             </div>
             <div className="bg-secondary/50 rounded-lg p-3 border border-border/30">
+              <div className="text-xs text-muted-foreground">Total Sum</div>
+              <div className="font-mono text-lg font-bold">{stats.sumOfRolls.toLocaleString()}</div>
+            </div>
+            <div className="bg-secondary/50 rounded-lg p-3 border border-border/30">
               <div className="text-xs text-muted-foreground">Average</div>
               <div className="font-mono text-lg font-bold">{avgRoll || "-"}</div>
             </div>
@@ -85,7 +89,7 @@ export const AchievementsPanel = ({
                 {stats.highestRoll > 0 ? stats.highestRoll : "-"}
               </div>
             </div>
-            <div className="bg-secondary/50 rounded-lg p-3 border border-border/30">
+            <div className="bg-secondary/50 rounded-lg p-3 border border-border/30 col-span-2">
               <div className="text-xs text-muted-foreground">Lowest</div>
               <div className="font-mono text-lg font-bold text-red-500">
                 {stats.lowestRoll < 101 ? stats.lowestRoll : "-"}
