@@ -23,7 +23,7 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex }: DiceItemProps) =
       {hasDot && (
         <div
           className={cn(
-            "w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-primary dot-glow",
+            "w-5 h-5 rounded-full bg-primary dot-glow border border-2 border-black",
             phase === "sorted" && "animate-pulse-dot"
           )}
           style={{
