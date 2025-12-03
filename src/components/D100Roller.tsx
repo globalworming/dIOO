@@ -6,6 +6,7 @@ import { RollHistory } from "./RollHistory";
 import { AchievementsPanel } from "./AchievementsPanel";
 import { FullscreenButton } from "./FullscreenButton";
 import { useGameState } from "@/hooks/useGameState";
+import { toast } from "sonner";
 
 type Phase = "idle" | "random" | "sorting" | "sorted";
 
@@ -36,7 +37,7 @@ const rollD100 = (): number => {
 };
 
 export const D100Roller = () => {
-  const { history, stats, achievements, addRoll, resetProgress } = useGameState();
+  const { history, stats, achievements, newlyUnlocked, addRoll, clearNewlyUnlocked, resetProgress } = useGameState();
   
   const initialResult = history.length > 0 ? history[0] : rollD100();
   const [items, setItems] = useState<boolean[]>(() => generateItemsWithDots(initialResult));
@@ -45,6 +46,18 @@ export const D100Roller = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Show toast for newly unlocked achievements
+  useEffect(() => {
+    if (newlyUnlocked.length > 0) {
+      newlyUnlocked.forEach(ach => {
+        toast.success(`🏆 Achievement Unlocked!`, {
+          description: `${ach.name}: ${ach.description}`,
+        });
+      });
+      clearNewlyUnlocked();
+    }
+  }, [newlyUnlocked, clearNewlyUnlocked]);
 
   const roll = useCallback(() => {
     if (phase !== "idle" && phase !== "sorted") return;
