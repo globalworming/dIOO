@@ -3,7 +3,9 @@ import { DiceGrid } from "./DiceGrid";
 import { RollButton } from "./RollButton";
 import { ResultDisplay } from "./ResultDisplay";
 import { RollHistory } from "./RollHistory";
+import { AchievementsPanel } from "./AchievementsPanel";
 import { FullscreenButton } from "./FullscreenButton";
+import { useGameState } from "@/hooks/useGameState";
 
 type Phase = "idle" | "random" | "sorting" | "sorted";
 
@@ -34,12 +36,14 @@ const rollD100 = (): number => {
 };
 
 export const D100Roller = () => {
-  const initialResult = rollD100();
+  const { history, stats, achievements, addRoll, resetProgress } = useGameState();
+  
+  const initialResult = history.length > 0 ? history[0] : rollD100();
   const [items, setItems] = useState<boolean[]>(() => generateItemsWithDots(initialResult));
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState<number | null>(initialResult);
-  const [history, setHistory] = useState<number[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const roll = useCallback(() => {
@@ -70,7 +74,7 @@ export const D100Roller = () => {
         // Step 5: Complete - show result
         setTimeout(() => {
           setResult(rolledResult);
-          setHistory((prev) => [rolledResult, ...prev]);
+          addRoll(rolledResult);
           setPhase("sorted");
         }, 1200 - 10 * rolledResult);
       }
@@ -102,6 +106,13 @@ export const D100Roller = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
+      <AchievementsPanel
+        achievements={achievements}
+        stats={stats}
+        isOpen={achievementsOpen}
+        onToggle={() => setAchievementsOpen(!achievementsOpen)}
+        onReset={resetProgress}
+      />
       <RollHistory
         history={history}
         isOpen={historyOpen}
