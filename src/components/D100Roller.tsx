@@ -183,30 +183,27 @@ export const D100Roller = () => {
         onReset={resetGame}
       />
 
-      <div className="w-full max-w-2xl mx-auto flex items-start gap-4">
-        {/* Modifier panel on left */}
-        <div className="flex-shrink-0">
+      <div className="w-full max-w-2xl mx-auto">
+        <ResultDisplay 
+          result={result} 
+          phase={phase} 
+          modifiedResult={modifiedResult}
+        />
+        <DiceGrid 
+          items={items} 
+          phase={phase} 
+          onClick={roll} 
+          result={result}
+          modifiers={modifiers}
+          modifiedResult={modifiedResult}
+        />
+        
+        {/* Modifier panel below grid */}
+        <div className="flex justify-center mt-4">
           <ModifierPanel 
             modifiers={modifiers} 
             onToggle={toggleModifier}
             disabled={isRolling}
-          />
-        </div>
-
-        {/* Main grid area */}
-        <div className="flex-1">
-          <ResultDisplay 
-            result={result} 
-            phase={phase} 
-            modifiedResult={modifiedResult}
-          />
-          <DiceGrid 
-            items={items} 
-            phase={phase} 
-            onClick={roll} 
-            result={result}
-            modifiers={modifiers}
-            modifiedResult={modifiedResult}
           />
         </div>
       </div>
