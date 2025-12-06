@@ -23,9 +23,9 @@ export const DiceGrid = ({ items, phase, onClick }: DiceGridProps) => {
     return sortedIndices.find((s) => s.originalIndex === originalIndex)?.sortedPosition ?? originalIndex;
   };
 
-  const shuffleX = (Math.random() - 0.5) * 10;
-  const shuffleY = (Math.random() - 0.5) * 10;
-  const shuffleR = (Math.random() - 0.5) * 5;
+  const shuffleX = (Math.random() - 0.5) * 20;
+  const shuffleY = (Math.random() - 0.5) * 20;
+  const shuffleR = (Math.random() - 0.5) * 8;
 
   const crosshairSvg = `data:image/svg+xml;base64,${btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">

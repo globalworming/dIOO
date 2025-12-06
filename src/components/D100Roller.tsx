@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
 import { DiceGrid } from "./DiceGrid";
-import { RollButton } from "./RollButton";
 import { ResultDisplay } from "./ResultDisplay";
 import { RollHistory } from "./RollHistory";
 import { FullscreenButton } from "./FullscreenButton";
@@ -111,10 +110,6 @@ export const D100Roller = () => {
       <div className="w-full max-w-2xl mx-auto">
         <ResultDisplay result={result} phase={phase} />
         <DiceGrid items={items} phase={phase} onClick={roll} />
-        
-        <div className="flex flex-col items-center gap-4 mt-8">
-          <RollButton onClick={roll} disabled={isRolling} />
-        </div>
       </div>
     </div>
   );
