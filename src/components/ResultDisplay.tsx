@@ -2,10 +2,14 @@ import { cn } from "@/lib/utils";
 
 interface ResultDisplayProps {
   result: number | null;
-  phase: "idle" | "random" | "sorting" | "sorted";
+  phase: "idle" | "random" | "sorting" | "sorted" | "modifying";
+  modifiedResult?: number | null;
 }
 
-export const ResultDisplay = ({ result, phase }: ResultDisplayProps) => {
+export const ResultDisplay = ({ result, phase, modifiedResult }: ResultDisplayProps) => {
+  const showModified = modifiedResult !== null && modifiedResult !== undefined && modifiedResult !== result;
+  const displayValue = showModified ? modifiedResult : result;
+  
   return (
     <div className="text-center mb-8">
       <div
@@ -13,11 +17,18 @@ export const ResultDisplay = ({ result, phase }: ResultDisplayProps) => {
           "result-display text-primary text-glow transition-all duration-500",
           phase === "random" && "opacity-30 blur-sm",
           phase === "sorting" && "opacity-60",
+          phase === "modifying" && "opacity-80",
           phase === "sorted" && "opacity-100 animate-fade-in-up"
         )}
       >
-        {result !== null ? result : "—"}
+        {displayValue !== null ? displayValue : "—"}
       </div>
+      {showModified && result !== null && (
+        <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground animate-fade-in-up">
+          <span className="opacity-60">{result}</span>
+          <span className="text-primary">+{modifiedResult! - result}</span>
+        </div>
+      )}
     </div>
   );
 };
