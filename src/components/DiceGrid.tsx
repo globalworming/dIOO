@@ -4,9 +4,15 @@ interface DiceGridProps {
   items: boolean[];
   phase: "idle" | "random" | "sorting" | "sorted";
   onClick?: () => void;
+  result?: number | null;
 }
 
-export const DiceGrid = ({ items, phase, onClick }: DiceGridProps) => {
+export const DiceGrid = ({ items, phase, onClick, result }: DiceGridProps) => {
+  // Calculate intensity based on result (0-1 scale)
+  const intensity = result ? result / 100 : 0;
+  const isHighRoll = result && result >= 80;
+  const isPerfect = result === 100;
+  const isLowRoll = result && result <= 20;
   // Create sorted indices - falses first, then trues
   const sortedIndices = items
     .map((hasDot, originalIndex) => ({ hasDot, originalIndex }))
@@ -34,10 +40,24 @@ export const DiceGrid = ({ items, phase, onClick }: DiceGridProps) => {
     </svg>
   `)}`;
 
+  // Dynamic glow style based on result
+  const gridGlowStyle = phase === "sorted" && result ? {
+    boxShadow: isPerfect 
+      ? `0 0 60px hsl(var(--primary) / 0.8), 0 0 120px hsl(var(--primary) / 0.4), 0 0 180px hsl(var(--primary) / 0.2)`
+      : isHighRoll
+        ? `0 0 ${30 * intensity}px hsl(var(--primary) / ${0.4 * intensity}), 0 0 ${60 * intensity}px hsl(var(--primary) / ${0.2 * intensity})`
+        : isLowRoll
+          ? `0 0 20px hsl(var(--muted) / 0.3)`
+          : undefined,
+  } : {};
+
   return (
     <div className="p-2">
       <div 
-        className="relative w-full max-w-lg mx-auto cursor-pointer"
+        className={`relative w-full max-w-lg mx-auto cursor-pointer transition-all duration-700 rounded-lg ${
+          isPerfect ? "animate-perfect-glow" : ""
+        } ${isHighRoll && !isPerfect ? "animate-high-roll-pulse" : ""}`}
+        style={gridGlowStyle}
         onClick={onClick && (phase === "idle" || phase === "sorted") ? onClick : undefined}
       >
         <div 
