@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  :root {
+    --background: 220 20% 6%;
+    --foreground: 45 10% 90%;
+
+    --card: 220 18% 10%;
+    --card-foreground: 45 10% 90%;
+
+    --popover: 220 18% 10%;
+    --popover-foreground: 45 10% 90%;
+
+    --primary: 38 95% 55%;
+    --primary-foreground: 220 20% 6%;
+
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 45 10% 85%;
+
+    --muted: 220 15% 12%;
+    --muted-foreground: 220 10% 50%;
+
+    --accent: 38 90% 45%;
+    --accent-foreground: 220 20% 6%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 38 95% 55%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --dot-glow: 38 95% 55%;
+    --dot-size: 0.5rem;
+    --grid-gap: 0.25rem;
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 220 20% 6%;
+    --foreground: 45 10% 90%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  code, .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer utilities {
+  .dot-glow {
+    box-shadow: 
+      0 0 8px hsl(var(--primary) / 0.6),
+      0 0 20px hsl(var(--primary) / 0.3),
+      0 0 40px hsl(var(--primary) / 0.1);
+  }
+
+  .text-glow {
+    text-shadow: 
+      0 0 10px hsl(var(--primary) / 0.5),
+      0 0 30px hsl(var(--primary) / 0.3);
+  }
+
+  .glass {
+    @apply bg-card/80 backdrop-blur-md border border-border/50;
+  }
+
+  .result-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(4rem, 15vw, 10rem);
+    font-weight: 700;
+    line-height: 1;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes shuffle {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(var(--shuffle-x, 10px)) translateY(var(--shuffle-y, -10px)) rotate(var(--shuffle-r, 5deg));
+  }
+  50% {
+    transform: translateX(calc(var(--shuffle-x, 10px) * -0.5)) translateY(calc(var(--shuffle-y, -10px) * 0.5)) rotate(calc(var(--shuffle-r, 5deg) * -1));
+  }
+  75% {
+    transform: translateX(calc(var(--shuffle-x, 10px) * 0.3)) translateY(calc(var(--shuffle-y, -10px) * -0.3)) rotate(calc(var(--shuffle-r, 5deg) * 0.5));
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+}
+
+.animate-shuffle {
+  animation: shuffle 0.6s ease-out;
+}
