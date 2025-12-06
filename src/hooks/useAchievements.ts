@@ -5,23 +5,29 @@ export interface Achievement {
   name: string;
   description: string;
   unlocked: boolean;
+  requiresNatural?: boolean; // If true, only natural rolls count
 }
 
 export interface GameStats {
   highestRoll: number;
+  highestNaturalRoll: number;
   totalSum: number;
+  totalNaturalSum: number;
   totalRolls: number;
+  totalModifiedRolls: number;
 }
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
-  { id: "reach-100", name: "Perfect Roll", description: "Roll a 100", unlocked: false },
-  { id: "reach-1", name: "Snake Eyes", description: "Roll a 1", unlocked: false },
+  { id: "reach-100", name: "Perfect Roll", description: "Roll a natural 100", unlocked: false, requiresNatural: true },
+  { id: "reach-1", name: "Snake Eyes", description: "Roll a natural 1", unlocked: false, requiresNatural: true },
+  { id: "modified-100", name: "Boosted Century", description: "Reach 100+ with modifiers", unlocked: false },
   { id: "ten-rolls", name: "Getting Started", description: "Roll 10 times", unlocked: false },
   { id: "fifty-rolls", name: "Dedicated Roller", description: "Roll 50 times", unlocked: false },
   { id: "hundred-rolls", name: "Century Club", description: "Roll 100 times", unlocked: false },
   { id: "sum-100", name: "First Hundred", description: "Total sum of 100", unlocked: false },
   { id: "sum-1000", name: "Thousandaire", description: "Total sum of 1000", unlocked: false },
   { id: "sum-10000", name: "Googol Seeker", description: "Total sum of 10000", unlocked: false },
+  { id: "first-mod", name: "Modifier Rookie", description: "Use a modifier for the first time", unlocked: false },
 ];
 
 const STORAGE_KEY = "d100-game-state";
@@ -31,12 +37,23 @@ interface StoredState {
   stats: GameStats;
 }
 
+const DEFAULT_STATS: GameStats = {
+  highestRoll: 0,
+  highestNaturalRoll: 0,
+  totalSum: 0,
+  totalNaturalSum: 0,
+  totalRolls: 0,
+  totalModifiedRolls: 0,
+};
+
 export const useAchievements = () => {
   const [achievements, setAchievements] = useState<Achievement[]>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed: StoredState = JSON.parse(stored);
-      return parsed.achievements;
+      // Merge with defaults to pick up any new achievements
+      const storedMap = new Map(parsed.achievements.map(a => [a.id, a]));
+      return DEFAULT_ACHIEVEMENTS.map(def => storedMap.get(def.id) || def);
     }
     return DEFAULT_ACHIEVEMENTS;
   });
@@ -45,9 +62,9 @@ export const useAchievements = () => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed: StoredState = JSON.parse(stored);
-      return parsed.stats;
+      return { ...DEFAULT_STATS, ...parsed.stats };
     }
-    return { highestRoll: 0, totalSum: 0, totalRolls: 0 };
+    return DEFAULT_STATS;
   });
 
   // Save to localStorage whenever state changes
@@ -62,17 +79,29 @@ export const useAchievements = () => {
   }, []);
 
   const checkAchievements = useCallback(
-    (roll: number, newStats: GameStats) => {
+    (naturalRoll: number, modifiedRoll: number, hasModifiers: boolean, newStats: GameStats) => {
       const newlyUnlocked: string[] = [];
 
-      // Check roll-based achievements
-      if (roll === 100 && !achievements.find((a) => a.id === "reach-100")?.unlocked) {
+      // Natural roll achievements
+      if (naturalRoll === 100 && !achievements.find((a) => a.id === "reach-100")?.unlocked) {
         unlockAchievement("reach-100");
         newlyUnlocked.push("Perfect Roll");
       }
-      if (roll === 1 && !achievements.find((a) => a.id === "reach-1")?.unlocked) {
+      if (naturalRoll === 1 && !achievements.find((a) => a.id === "reach-1")?.unlocked) {
         unlockAchievement("reach-1");
         newlyUnlocked.push("Snake Eyes");
+      }
+
+      // Modified roll achievements
+      if (hasModifiers && modifiedRoll >= 100 && !achievements.find((a) => a.id === "modified-100")?.unlocked) {
+        unlockAchievement("modified-100");
+        newlyUnlocked.push("Boosted Century");
+      }
+
+      // First modifier use
+      if (hasModifiers && !achievements.find((a) => a.id === "first-mod")?.unlocked) {
+        unlockAchievement("first-mod");
+        newlyUnlocked.push("Modifier Rookie");
       }
 
       // Check roll count achievements
@@ -89,7 +118,7 @@ export const useAchievements = () => {
         newlyUnlocked.push("Century Club");
       }
 
-      // Check sum achievements
+      // Check sum achievements (using total sum including modifiers)
       if (newStats.totalSum >= 100 && !achievements.find((a) => a.id === "sum-100")?.unlocked) {
         unlockAchievement("sum-100");
         newlyUnlocked.push("First Hundred");
@@ -109,21 +138,24 @@ export const useAchievements = () => {
   );
 
   const recordRoll = useCallback(
-    (roll: number) => {
+    (naturalRoll: number, modifiedRoll: number, hasModifiers: boolean) => {
       const newStats: GameStats = {
-        highestRoll: Math.max(stats.highestRoll, roll),
-        totalSum: stats.totalSum + roll,
+        highestRoll: Math.max(stats.highestRoll, modifiedRoll),
+        highestNaturalRoll: Math.max(stats.highestNaturalRoll, naturalRoll),
+        totalSum: stats.totalSum + modifiedRoll,
+        totalNaturalSum: stats.totalNaturalSum + naturalRoll,
         totalRolls: stats.totalRolls + 1,
+        totalModifiedRolls: hasModifiers ? stats.totalModifiedRolls + 1 : stats.totalModifiedRolls,
       };
       setStats(newStats);
-      return checkAchievements(roll, newStats);
+      return checkAchievements(naturalRoll, modifiedRoll, hasModifiers, newStats);
     },
     [stats, checkAchievements]
   );
 
   const resetGame = useCallback(() => {
     setAchievements(DEFAULT_ACHIEVEMENTS);
-    setStats({ highestRoll: 0, totalSum: 0, totalRolls: 0 });
+    setStats(DEFAULT_STATS);
   }, []);
 
   return { achievements, stats, recordRoll, resetGame };

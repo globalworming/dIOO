@@ -41,10 +41,14 @@ export const AchievementPanel = ({
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="glass rounded-lg p-3 text-center">
             <div className="text-2xl font-bold mono text-primary">{stats.highestRoll}</div>
             <div className="text-xs text-muted-foreground">Highest Roll</div>
+          </div>
+          <div className="glass rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold mono text-primary">{stats.highestNaturalRoll}</div>
+            <div className="text-xs text-muted-foreground">Highest Natural</div>
           </div>
           <div className="glass rounded-lg p-3 text-center">
             <div className="text-2xl font-bold mono text-primary">{stats.totalSum.toLocaleString()}</div>

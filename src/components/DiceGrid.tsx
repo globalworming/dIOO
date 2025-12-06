@@ -1,18 +1,26 @@
 import { DiceItem } from "./DiceItem";
+import { Modifier } from "./ModifierPanel";
 
 interface DiceGridProps {
   items: boolean[];
-  phase: "idle" | "random" | "sorting" | "sorted";
+  phase: "idle" | "random" | "sorting" | "sorted" | "modifying";
   onClick?: () => void;
   result?: number | null;
+  modifiers?: Modifier[];
+  modifiedResult?: number | null;
 }
 
-export const DiceGrid = ({ items, phase, onClick, result }: DiceGridProps) => {
+export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifiedResult }: DiceGridProps) => {
+  const displayResult = modifiedResult ?? result;
   // Calculate intensity based on result (0-1 scale)
-  const intensity = result ? result / 100 : 0;
-  const isHighRoll = result && result >= 80;
-  const isPerfect = result === 100;
-  const isLowRoll = result && result <= 20;
+  const intensity = displayResult ? displayResult / 100 : 0;
+  const isHighRoll = displayResult && displayResult >= 80;
+  const isPerfect = displayResult === 100 || (modifiedResult && modifiedResult >= 100);
+  const isLowRoll = displayResult && displayResult <= 20;
+  
+  // Get active modifier zones
+  const activeModifiers = modifiers.filter(m => m.active);
+  const highlightedZones = new Set(activeModifiers.flatMap(m => m.zones));
   // Create sorted indices - falses first, then trues
   const sortedIndices = items
     .map((hasDot, originalIndex) => ({ hasDot, originalIndex }))
@@ -40,8 +48,40 @@ export const DiceGrid = ({ items, phase, onClick, result }: DiceGridProps) => {
     </svg>
   `)}`;
 
+  // Generate modifier overlay SVGs
+  const cornersSvg = modifiers.find(m => m.id === "corners")?.active ? `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect x="0" y="0" width="30" height="30" fill="hsla(38, 95%, 55%, 0.15)" stroke="hsla(38, 95%, 55%, 0.4)" stroke-width="0.3"/>
+      <rect x="70" y="0" width="30" height="30" fill="hsla(38, 95%, 55%, 0.15)" stroke="hsla(38, 95%, 55%, 0.4)" stroke-width="0.3"/>
+      <rect x="0" y="70" width="30" height="30" fill="hsla(38, 95%, 55%, 0.15)" stroke="hsla(38, 95%, 55%, 0.4)" stroke-width="0.3"/>
+      <rect x="70" y="70" width="30" height="30" fill="hsla(38, 95%, 55%, 0.15)" stroke="hsla(38, 95%, 55%, 0.4)" stroke-width="0.3"/>
+    </svg>
+  `)}` : null;
+
+  const bullseyeSvg = modifiers.find(m => m.id === "bullseye")?.active ? `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect x="30" y="30" width="40" height="40" fill="hsla(0, 85%, 55%, 0.15)" stroke="hsla(0, 85%, 55%, 0.5)" stroke-width="0.4"/>
+      <circle cx="50" cy="50" r="15" fill="none" stroke="hsla(0, 85%, 55%, 0.3)" stroke-width="0.3"/>
+    </svg>
+  `)}` : null;
+
+  const diagonalsSvg = modifiers.find(m => m.id === "diagonals")?.active ? `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <line x1="0" y1="0" x2="100" y2="100" stroke="hsla(280, 85%, 55%, 0.5)" stroke-width="10"/>
+      <line x1="100" y1="0" x2="0" y2="100" stroke="hsla(280, 85%, 55%, 0.5)" stroke-width="10"/>
+    </svg>
+  `)}` : null;
+
+  const crossSvg = modifiers.find(m => m.id === "cross")?.active ? `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect x="0" y="40" width="100" height="20" fill="hsla(180, 85%, 45%, 0.15)" stroke="hsla(180, 85%, 45%, 0.4)" stroke-width="0.3"/>
+      <rect x="40" y="0" width="20" height="100" fill="hsla(180, 85%, 45%, 0.15)" stroke="hsla(180, 85%, 45%, 0.4)" stroke-width="0.3"/>
+    </svg>
+  `)}` : null;
+
   // Dynamic glow style based on result
-  const gridGlowStyle = phase === "sorted" && result ? {
+  const isResultPhase = phase === "sorted" || phase === "modifying";
+  const gridGlowStyle = isResultPhase && displayResult ? {
     boxShadow: isPerfect 
       ? `0 0 60px hsl(var(--primary) / 0.8), 0 0 120px hsl(var(--primary) / 0.4), 0 0 180px hsl(var(--primary) / 0.2)`
       : isHighRoll
@@ -60,6 +100,7 @@ export const DiceGrid = ({ items, phase, onClick, result }: DiceGridProps) => {
         style={gridGlowStyle}
         onClick={onClick && (phase === "idle" || phase === "sorted") ? onClick : undefined}
       >
+        {/* Crosshair overlay */}
         <div 
           className={`absolute inset-0 ${phase === "random" ? "animate-shuffle" : ""}`}
           style={{
@@ -72,6 +113,43 @@ export const DiceGrid = ({ items, phase, onClick, result }: DiceGridProps) => {
             "--shuffle-r": `${shuffleR}deg`,
           } as React.CSSProperties}
         />
+        {/* Modifier overlays */}
+        {cornersSvg && (
+          <div 
+            className="absolute inset-0 pointer-events-none animate-fade-in transition-opacity duration-300"
+            style={{
+              backgroundImage: `url("${cornersSvg}")`,
+              backgroundSize: '100% 100%',
+            }}
+          />
+        )}
+        {bullseyeSvg && (
+          <div 
+            className="absolute inset-0 pointer-events-none animate-fade-in transition-opacity duration-300"
+            style={{
+              backgroundImage: `url("${bullseyeSvg}")`,
+              backgroundSize: '100% 100%',
+            }}
+          />
+        )}
+        {diagonalsSvg && (
+          <div 
+            className="absolute inset-0 pointer-events-none animate-fade-in transition-opacity duration-300"
+            style={{
+              backgroundImage: `url("${diagonalsSvg}")`,
+              backgroundSize: '100% 100%',
+            }}
+          />
+        )}
+        {crossSvg && (
+          <div 
+            className="absolute inset-0 pointer-events-none animate-fade-in transition-opacity duration-300"
+            style={{
+              backgroundImage: `url("${crossSvg}")`,
+              backgroundSize: '100% 100%',
+            }}
+          />
+        )}
         <div className={`grid grid-cols-10 gap-1 sm:gap-1.5 relative ${phase === "random" ? "animate-shuffle" : ""}`}
                style={{
             "--shuffle-x": `${shuffleX}px`,
@@ -86,6 +164,7 @@ export const DiceGrid = ({ items, phase, onClick, result }: DiceGridProps) => {
               index={index}
               phase={phase === "idle" ? "sorted" : phase}
               sortedIndex={getSortedIndex(index)}
+              highlighted={highlightedZones.has(index)}
             />
           ))}
         </div>
