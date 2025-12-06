@@ -5,6 +5,7 @@ interface DiceItemProps {
   index: number;
   phase: "random" | "sorting" | "sorted";
   sortedIndex: number;
+  intensity?: number;
 }
 
 export const DiceItem = ({ hasDot, index, phase, sortedIndex }: DiceItemProps) => {

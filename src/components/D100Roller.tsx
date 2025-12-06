@@ -3,6 +3,10 @@ import { DiceGrid } from "./DiceGrid";
 import { ResultDisplay } from "./ResultDisplay";
 import { RollHistory } from "./RollHistory";
 import { FullscreenButton } from "./FullscreenButton";
+import { AchievementButton } from "./AchievementButton";
+import { AchievementPanel } from "./AchievementPanel";
+import { useAchievements } from "@/hooks/useAchievements";
+import { toast } from "sonner";
 
 type Phase = "idle" | "random" | "sorting" | "sorted";
 
@@ -40,6 +44,9 @@ export const D100Roller = () => {
   const [history, setHistory] = useState<number[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [achievementPanelOpen, setAchievementPanelOpen] = useState(false);
+  
+  const { achievements, stats, recordRoll, resetGame } = useAchievements();
 
   const roll = useCallback(() => {
     if (phase !== "idle" && phase !== "sorted") return;
@@ -71,6 +78,14 @@ export const D100Roller = () => {
           setResult(rolledResult);
           setHistory((prev) => [rolledResult, ...prev]);
           setPhase("sorted");
+          
+          // Record roll and check achievements
+          const newlyUnlocked = recordRoll(rolledResult);
+          newlyUnlocked.forEach((name) => {
+            toast.success(`Achievement Unlocked: ${name}!`, {
+              duration: 3000,
+            });
+          });
         }, 1200 - 10 * rolledResult);
       }
     }, 140);
@@ -106,10 +121,22 @@ export const D100Roller = () => {
         isOpen={historyOpen}
         onToggle={() => setHistoryOpen(!historyOpen)}
       />
+      <AchievementButton
+        onClick={() => setAchievementPanelOpen(true)}
+        unlockedCount={achievements.filter((a) => a.unlocked).length}
+        totalCount={achievements.length}
+      />
+      <AchievementPanel
+        isOpen={achievementPanelOpen}
+        onClose={() => setAchievementPanelOpen(false)}
+        achievements={achievements}
+        stats={stats}
+        onReset={resetGame}
+      />
 
       <div className="w-full max-w-2xl mx-auto">
         <ResultDisplay result={result} phase={phase} />
-        <DiceGrid items={items} phase={phase} onClick={roll} />
+        <DiceGrid items={items} phase={phase} onClick={roll} result={result} />
       </div>
     </div>
   );
