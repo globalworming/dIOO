@@ -19,7 +19,7 @@ interface ModifierPanelProps {
 
 export const ModifierPanel = ({ modifiers, onToggle, disabled }: ModifierPanelProps) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-row gap-2">
       {modifiers.map((mod) => (
         <Button
           key={mod.id}
