@@ -59,7 +59,7 @@ const calculateModifiedResult = (
 };
 
 export const D100Roller = () => {
-  const initialResult = rollD100();
+  const initialResult = 0;
   const [items, setItems] = useState<boolean[]>(() => generateItemsWithDots(initialResult));
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState<number | null>(initialResult);
