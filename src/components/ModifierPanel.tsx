@@ -8,7 +8,6 @@ export interface Modifier {
   description: string;
   active: boolean;
   zones: number[]; // indices 0-99 that score bonus
-  multiplier: number;
 }
 
 interface ModifierPanelProps {
@@ -85,36 +84,32 @@ export const DEFAULT_MODIFIERS: Modifier[] = [
     id: "corners",
     name: "Corners",
     icon: <Grid3X3 size={18} />,
-    description: "Corner zones score +50% bonus",
+    description: "Dots in corners score +1",
     active: false,
     zones: createCornerZones(),
-    multiplier: 1.5,
   },
   {
     id: "bullseye",
     name: "Bullseye",
     icon: <Target size={18} />,
-    description: "Center zone scores +100% bonus",
+    description: "Dots in center score +1",
     active: false,
     zones: createCenterZones(),
-    multiplier: 2.0,
   },
   {
     id: "diagonals",
     name: "Diagonals",
     icon: <Layers size={18} />,
-    description: "Diagonal zones score +75% bonus",
+    description: "Dots on diagonals score +1",
     active: false,
     zones: createDiagonalZones(),
-    multiplier: 1.75,
   },
   {
     id: "cross",
     name: "Cross",
     icon: <Zap size={18} />,
-    description: "Cross zones score +60% bonus",
+    description: "Dots on cross score +1",
     active: false,
     zones: createCrossZones(),
-    multiplier: 1.6,
   },
 ];

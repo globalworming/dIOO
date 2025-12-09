@@ -46,14 +46,11 @@ const calculateModifiedResult = (
   const activeModifiers = modifiers.filter(m => m.active);
   if (activeModifiers.length === 0) return naturalRoll;
 
-  let bonusPoints = 0;
+  // Collect all active zones (union)
+  const activeZones = new Set(activeModifiers.flatMap(m => m.zones));
   
-  // Count dots in each modifier zone
-  activeModifiers.forEach(mod => {
-    const dotsInZone = mod.zones.filter(zoneIndex => items[zoneIndex]).length;
-    // Bonus = dots in zone * (multiplier - 1) to add extra points
-    bonusPoints += Math.floor(dotsInZone * (mod.multiplier - 1));
-  });
+  // Count dots that are in any active zone (+1 per dot)
+  const bonusPoints = items.filter((hasDot, index) => hasDot && activeZones.has(index)).length;
 
   return naturalRoll + bonusPoints;
 };

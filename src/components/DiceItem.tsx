@@ -7,9 +7,10 @@ interface DiceItemProps {
   sortedIndex: number;
   intensity?: number;
   highlighted?: boolean;
+  modifierColor?: string;
 }
 
-export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted }: DiceItemProps) => {
+export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modifierColor }: DiceItemProps) => {
   return (
     <div
       className={cn(
@@ -26,12 +27,15 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted }: Dic
       {hasDot && (
         <div
           className={cn(
-            "w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-primary dot-glow",
+            "w-2 h-2 sm:w-3 sm:h-3 rounded-full dot-glow transition-colors duration-300",
             (phase === "sorted" || phase === "modifying") && "animate-pulse-dot",
-            highlighted && hasDot && "scale-110"
+            highlighted && hasDot && "scale-110",
+            !modifierColor && "bg-primary"
           )}
           style={{
             animationDelay: `${sortedIndex * 20}ms`,
+            backgroundColor: modifierColor,
+            boxShadow: modifierColor ? `0 0 8px ${modifierColor}` : undefined,
           }}
         />
       )}

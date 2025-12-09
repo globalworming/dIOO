@@ -18,9 +18,27 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
   const isPerfect = displayResult === 100 || (modifiedResult && modifiedResult >= 100);
   const isLowRoll = displayResult && displayResult <= 20;
   
-  // Get active modifier zones
+  // Modifier colors matching the SVG overlays
+  const MODIFIER_COLORS: Record<string, string> = {
+    corners: "hsl(38, 95%, 55%)",
+    bullseye: "hsl(0, 85%, 55%)",
+    diagonals: "hsl(280, 85%, 55%)",
+    cross: "hsl(180, 85%, 45%)",
+  };
+
+  // Get active modifier zones with colors
   const activeModifiers = modifiers.filter(m => m.active);
   const highlightedZones = new Set(activeModifiers.flatMap(m => m.zones));
+  
+  // Map each zone index to its modifier color (first active modifier wins)
+  const getModifierColor = (index: number): string | undefined => {
+    for (const mod of activeModifiers) {
+      if (mod.zones.includes(index)) {
+        return MODIFIER_COLORS[mod.id];
+      }
+    }
+    return undefined;
+  };
   // Create sorted indices - falses first, then trues
   const sortedIndices = items
     .map((hasDot, originalIndex) => ({ hasDot, originalIndex }))
@@ -124,7 +142,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
             "--shuffle-r": `${shuffleR}deg`,
           } as React.CSSProperties}
         />
-        {/* Modifier overlays */}
+        {/* Modifier overlays, TODO: cleanup or use svgs somehow, maybe more subtle background with blur or gradient */}
         {false && modifierOverlays.map(({ id, svg }) => (
           svg && (
             <div 
@@ -152,6 +170,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
               phase={phase === "idle" ? "sorted" : phase}
               sortedIndex={getSortedIndex(index)}
               highlighted={highlightedZones.has(index)}
+              modifierColor={getModifierColor(index)}
             />
           ))}
         </div>

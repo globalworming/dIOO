@@ -23,12 +23,16 @@ export const ResultDisplay = ({ result, phase, modifiedResult }: ResultDisplayPr
       >
         {displayValue !== null ? displayValue : "—"}
       </div>
-      {showModified && result !== null && (
-        <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground animate-fade-in-up">
-          <span className="opacity-60">{result}</span>
-          <span className="text-primary">+{modifiedResult! - result}</span>
-        </div>
-      )}
+      <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground h-5">
+        {showModified && result !== null ? (
+          <div className="flex items-center gap-2 animate-fade-in-up">
+            <span className="opacity-60">{result}</span>
+            <span className="text-primary">+{modifiedResult! - result}</span>
+          </div>
+        ) : (
+          <span className="invisible">—</span>
+        )}
+      </div>
     </div>
   );
 };
