@@ -10,7 +10,6 @@ export interface Achievement {
 
 export interface GameStats {
   highestRoll: number;
-  highestNaturalRoll: number;
   totalSum: number;
   totalNaturalSum: number;
   totalRolls: number;
@@ -39,7 +38,6 @@ interface StoredState {
 
 const DEFAULT_STATS: GameStats = {
   highestRoll: 0,
-  highestNaturalRoll: 0,
   totalSum: 0,
   totalNaturalSum: 0,
   totalRolls: 0,
@@ -141,7 +139,6 @@ export const useAchievements = () => {
     (naturalRoll: number, modifiedRoll: number, hasModifiers: boolean) => {
       const newStats: GameStats = {
         highestRoll: Math.max(stats.highestRoll, modifiedRoll),
-        highestNaturalRoll: Math.max(stats.highestNaturalRoll, naturalRoll),
         totalSum: stats.totalSum + modifiedRoll,
         totalNaturalSum: stats.totalNaturalSum + naturalRoll,
         totalRolls: stats.totalRolls + 1,

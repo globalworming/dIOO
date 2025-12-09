@@ -35,20 +35,19 @@ export const AchievementPanel = ({
         <div className="flex items-center gap-3 mb-6">
           <Trophy className="w-6 h-6 text-primary" />
           <h2 className="text-xl font-semibold">Achievements</h2>
-          <span className="ml-auto text-sm text-muted-foreground">
-            {unlockedCount}/{achievements.length}
-          </span>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="glass rounded-lg p-3 text-center">
-            <div className="text-2xl font-bold mono text-primary">{stats.highestRoll}</div>
-            <div className="text-xs text-muted-foreground">Highest Roll</div>
+            <div className="text-2xl font-bold mono text-primary">
+            {unlockedCount}/{achievements.length}
+            </div>
+            <div className="text-xs text-muted-foreground">Unlocked</div>
           </div>
           <div className="glass rounded-lg p-3 text-center">
-            <div className="text-2xl font-bold mono text-primary">{stats.highestNaturalRoll}</div>
-            <div className="text-xs text-muted-foreground">Highest Natural</div>
+            <div className="text-2xl font-bold mono text-primary">{stats.highestRoll}</div>
+            <div className="text-xs text-muted-foreground">Highest Roll</div>
           </div>
           <div className="glass rounded-lg p-3 text-center">
             <div className="text-2xl font-bold mono text-primary">{stats.totalSum.toLocaleString()}</div>
