@@ -11,14 +11,14 @@ export const ResultDisplay = ({ result, phase, modifiedResult }: ResultDisplayPr
   const displayValue = showModified ? modifiedResult : result;
   
   return (
-    <div className="text-center mb-8">
+    <div className="text-center rounded-lg mb-8 p-2 relative z-10 bg-black/50">
       <div
         className={cn(
           "result-display text-primary text-glow transition-all duration-500",
           phase === "random" && "opacity-30 blur-sm",
           phase === "sorting" && "opacity-60",
           phase === "modifying" && "opacity-80",
-          phase === "sorted" && "opacity-100 animate-fade-in-up"
+          phase === "sorted" && "opacity-100"
         )}
       >
         {displayValue !== null ? displayValue : "—"}
@@ -26,7 +26,7 @@ export const ResultDisplay = ({ result, phase, modifiedResult }: ResultDisplayPr
       <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground h-5">
         {showModified && result !== null ? (
           <div className="flex items-center gap-2 animate-fade-in-up">
-            <span className="opacity-60">{result}</span>
+            <span className="text-white">{result}</span>
             <span className="text-primary">+{modifiedResult! - result}</span>
           </div>
         ) : (
