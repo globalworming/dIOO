@@ -1,5 +1,5 @@
 import { DiceItem } from "./DiceItem";
-import { Modifier } from "./ModifierPanel";
+import { Modifier, MODIFIER_COLORS } from "./ModifierPanel";
 
 interface DiceGridProps {
   items: boolean[];
@@ -18,14 +18,6 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
   const isPerfect = displayResult === 100 || (modifiedResult && modifiedResult >= 100);
   const isLowRoll = displayResult && displayResult <= 20;
   
-  // Modifier colors matching the SVG overlays
-  const MODIFIER_COLORS: Record<string, string> = {
-    corners: "hsl(38, 95%, 55%)",
-    bullseye: "hsl(0, 85%, 55%)",
-    diagonals: "hsl(280, 85%, 55%)",
-    cross: "hsl(180, 85%, 45%)",
-  };
-
   // Get active modifier zones with colors
   const activeModifiers = modifiers.filter(m => m.active);
   const highlightedZones = new Set(activeModifiers.flatMap(m => m.zones));

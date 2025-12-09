@@ -1,13 +1,15 @@
 import { cn } from "@/lib/utils";
+import { ModifierBonus } from "./ModifierPanel";
 
 interface ResultDisplayProps {
   result: number | null;
   phase: "idle" | "random" | "sorting" | "sorted" | "modifying";
   modifiedResult?: number | null;
+  modifierBonuses?: ModifierBonus[];
 }
 
-export const ResultDisplay = ({ result, phase, modifiedResult }: ResultDisplayProps) => {
-  const showModified = modifiedResult !== null && modifiedResult !== undefined && modifiedResult !== result;
+export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses = [] }: ResultDisplayProps) => {
+  const showModified = modifierBonuses.length > 0 && result !== null;
   const displayValue = showModified ? modifiedResult : result;
   
   return (
@@ -24,10 +26,12 @@ export const ResultDisplay = ({ result, phase, modifiedResult }: ResultDisplayPr
         {displayValue !== null ? displayValue : "—"}
       </div>
       <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground h-5">
-        {showModified && result !== null ? (
-          <div className="flex items-center gap-2 animate-fade-in-up">
+        {showModified ? (
+          <div className="flex items-center gap-1 animate-fade-in-up">
             <span className="text-white">{result}</span>
-            <span className="text-primary">+{modifiedResult! - result}</span>
+            {modifierBonuses.map((bonus) => (
+              <span key={bonus.id} style={{ color: bonus.color }}>+{bonus.bonus}</span>
+            ))}
           </div>
         ) : (
           <span className="invisible">—</span>

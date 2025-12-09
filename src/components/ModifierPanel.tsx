@@ -10,6 +10,20 @@ export interface Modifier {
   zones: number[]; // indices 0-99 that score bonus
 }
 
+// Modifier colors for dots and result display
+export const MODIFIER_COLORS: Record<string, string> = {
+  corners: "hsl(38, 95%, 55%)",
+  bullseye: "hsl(0, 85%, 55%)",
+  diagonals: "hsl(280, 85%, 55%)",
+  cross: "hsl(180, 85%, 45%)",
+};
+
+export interface ModifierBonus {
+  id: string;
+  color: string;
+  bonus: number;
+}
+
 interface ModifierPanelProps {
   modifiers: Modifier[];
   onToggle: (id: string) => void;

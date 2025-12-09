@@ -5,7 +5,7 @@ import { RollHistory } from "./RollHistory";
 import { FullscreenButton } from "./FullscreenButton";
 import { AchievementButton } from "./AchievementButton";
 import { AchievementPanel } from "./AchievementPanel";
-import { ModifierPanel, DEFAULT_MODIFIERS, Modifier } from "./ModifierPanel";
+import { ModifierPanel, DEFAULT_MODIFIERS, Modifier, ModifierBonus, MODIFIER_COLORS } from "./ModifierPanel";
 import { useAchievements } from "@/hooks/useAchievements";
 import { toast } from "sonner";
 
@@ -37,22 +37,29 @@ const rollD100 = (): number => {
   return Math.floor(Math.random() * 100) + 1;
 };
 
-// Calculate bonus from modifiers
-const calculateModifiedResult = (
-  naturalRoll: number,
+// Calculate bonus breakdown by modifier
+const calculateModifierBonuses = (
   items: boolean[],
   modifiers: Modifier[]
-): number => {
+): ModifierBonus[] => {
   const activeModifiers = modifiers.filter(m => m.active);
-  if (activeModifiers.length === 0) return naturalRoll;
-
-  // Collect all active zones (union)
-  const activeZones = new Set(activeModifiers.flatMap(m => m.zones));
+  const countedIndices = new Set<number>();
   
-  // Count dots that are in any active zone (+1 per dot)
-  const bonusPoints = items.filter((hasDot, index) => hasDot && activeZones.has(index)).length;
-
-  return naturalRoll + bonusPoints;
+  return activeModifiers.map(mod => {
+    // Count dots in this modifier's zone that haven't been counted yet
+    let bonus = 0;
+    for (const zoneIndex of mod.zones) {
+      if (items[zoneIndex] && !countedIndices.has(zoneIndex)) {
+        bonus++;
+        countedIndices.add(zoneIndex);
+      }
+    }
+    return {
+      id: mod.id,
+      color: MODIFIER_COLORS[mod.id],
+      bonus,
+    };
+  }).filter(b => b.bonus > 0);
 };
 
 export const D100Roller = () => {
@@ -61,6 +68,7 @@ export const D100Roller = () => {
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState<number | null>(initialResult);
   const [modifiedResult, setModifiedResult] = useState<number | null>(null);
+  const [modifierBonuses, setModifierBonuses] = useState<ModifierBonus[]>([]);
   const [history, setHistory] = useState<number[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -84,6 +92,7 @@ export const D100Roller = () => {
     const rolledResult = rollD100();
     setResult(null);
     setModifiedResult(null);
+    setModifierBonuses([]);
     setPhase("random");
     
     // Step 2: Converging animation from 50% to rolled result
@@ -114,12 +123,14 @@ export const D100Roller = () => {
             
             // Calculate and show modified result after brief delay
             setTimeout(() => {
-              const modified = calculateModifiedResult(rolledResult, finalItems, modifiers);
-              setModifiedResult(modified);
+              const bonuses = calculateModifierBonuses(finalItems, modifiers);
+              const totalBonus = bonuses.reduce((sum, b) => sum + b.bonus, 0);
+              setModifierBonuses(bonuses);
+              setModifiedResult(rolledResult + totalBonus);
               setPhase("sorted");
               
               // Record with modifiers
-              const newlyUnlocked = recordRoll(rolledResult, modified, true);
+              const newlyUnlocked = recordRoll(rolledResult, rolledResult + totalBonus, true);
               newlyUnlocked.forEach((name) => {
                 toast.success(`Achievement Unlocked: ${name}!`, { duration: 3000 });
               });
@@ -185,6 +196,7 @@ export const D100Roller = () => {
           result={result} 
           phase={phase} 
           modifiedResult={modifiedResult}
+          modifierBonuses={modifierBonuses}
         />
         <DiceGrid 
           items={items} 
