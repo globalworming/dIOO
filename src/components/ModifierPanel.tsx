@@ -16,15 +16,45 @@ interface ModifierPanelProps {
   disabled?: boolean;
 }
 
+// SVG backgrounds for each modifier button
+const MODIFIER_BACKGROUNDS: Record<string, string> = {
+  corners: `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect x="0" y="0" width="30" height="30" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
+      <rect x="70" y="0" width="30" height="30" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
+      <rect x="0" y="70" width="30" height="30" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
+      <rect x="70" y="70" width="30" height="30" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
+    </svg>
+  `)}`,
+  bullseye: `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect x="30" y="30" width="40" height="40" fill="hsla(0, 85%, 55%, 1)" stroke="hsla(0, 85%, 55%, 1)" stroke-width="1"/>
+      <circle cx="50" cy="50" r="15" fill="none" stroke="hsla(0, 85%, 55%, 1)" stroke-width="1"/>
+    </svg>
+  `)}`,
+  diagonals: `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <line x1="0" y1="0" x2="100" y2="100" stroke="hsla(280, 85%, 55%, 1)" stroke-width="12"/>
+      <line x1="100" y1="0" x2="0" y2="100" stroke="hsla(280, 85%, 55%, 1)" stroke-width="12"/>
+    </svg>
+  `)}`,
+  cross: `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect x="0" y="40" width="100" height="20" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
+      <rect x="40" y="0" width="20" height="100" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
+    </svg>
+  `)}`,
+};
+
 export const ModifierPanel = ({ modifiers, onToggle, disabled }: ModifierPanelProps) => {
   return (
     <div className="flex flex-row gap-2">
       {modifiers.map((mod) => (
         <Button
           key={mod.id}
-          variant={mod.active ? "default" : "outline"}
+          variant={mod.active ? "secondary" : "outline"}
           size="sm"
-          className={`w-10 h-10 p-0 transition-all duration-300 ${
+          className={`w-10 h-10 p-0 transition-all duration-300 relative overflow-hidden ${
             mod.active 
               ? "ring-2 ring-primary/50 shadow-lg shadow-primary/20" 
               : "opacity-60 hover:opacity-100"
@@ -32,8 +62,12 @@ export const ModifierPanel = ({ modifiers, onToggle, disabled }: ModifierPanelPr
           onClick={() => onToggle(mod.id)}
           disabled={disabled}
           title={`${mod.name}: ${mod.description}`}
+          style={{
+            backgroundImage: `url("${MODIFIER_BACKGROUNDS[mod.id]}")`,
+            backgroundSize: '100% 100%',
+          }}
         >
-          {mod.icon}
+          <span className="relative z-10"></span>
         </Button>
       ))}
     </div>

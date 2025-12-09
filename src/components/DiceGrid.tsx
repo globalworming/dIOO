@@ -66,48 +66,6 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
     </svg>
   `)}`;
 
-  // Generate modifier overlay SVGs
-  const modifierOverlays = [
-    {
-      id: "corners",
-      svg: modifiers.find(m => m.id === "corners")?.active ? `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="30" height="30" fill="hsla(38, 95%, 55%, 0.15)" stroke="hsla(38, 95%, 55%, 0.4)" stroke-width="0.3"/>
-      <rect x="70" y="0" width="30" height="30" fill="hsla(38, 95%, 55%, 0.15)" stroke="hsla(38, 95%, 55%, 0.4)" stroke-width="0.3"/>
-      <rect x="0" y="70" width="30" height="30" fill="hsla(38, 95%, 55%, 0.15)" stroke="hsla(38, 95%, 55%, 0.4)" stroke-width="0.3"/>
-      <rect x="70" y="70" width="30" height="30" fill="hsla(38, 95%, 55%, 0.15)" stroke="hsla(38, 95%, 55%, 0.4)" stroke-width="0.3"/>
-    </svg>
-  `)}` : null,
-    },
-    {
-      id: "bullseye",
-      svg: modifiers.find(m => m.id === "bullseye")?.active ? `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="30" y="30" width="40" height="40" fill="hsla(0, 85%, 55%, 0.15)" stroke="hsla(0, 85%, 55%, 0.5)" stroke-width="0.4"/>
-      <circle cx="50" cy="50" r="15" fill="none" stroke="hsla(0, 85%, 55%, 0.3)" stroke-width="0.3"/>
-    </svg>
-  `)}` : null,
-    },
-    {
-      id: "diagonals",
-      svg: modifiers.find(m => m.id === "diagonals")?.active ? `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <line x1="0" y1="0" x2="100" y2="100" stroke="hsla(280, 85%, 55%, 0.5)" stroke-width="10"/>
-      <line x1="100" y1="0" x2="0" y2="100" stroke="hsla(280, 85%, 55%, 0.5)" stroke-width="10"/>
-    </svg>
-  `)}` : null,
-    },
-    {
-      id: "cross",
-      svg: modifiers.find(m => m.id === "cross")?.active ? `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="40" width="100" height="20" fill="hsla(180, 85%, 45%, 0.15)" stroke="hsla(180, 85%, 45%, 0.4)" stroke-width="0.3"/>
-      <rect x="40" y="0" width="20" height="100" fill="hsla(180, 85%, 45%, 0.15)" stroke="hsla(180, 85%, 45%, 0.4)" stroke-width="0.3"/>
-    </svg>
-  `)}` : null,
-    },
-  ];
-
   // Dynamic glow style based on result
   const isResultPhase = phase === "sorted" || phase === "modifying";
   const gridGlowStyle = isResultPhase && displayResult ? {
@@ -142,20 +100,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
             "--shuffle-r": `${shuffleR}deg`,
           } as React.CSSProperties}
         />
-        {/* Modifier overlays, TODO: cleanup or use svgs somehow, maybe more subtle background with blur or gradient */}
-        {false && modifierOverlays.map(({ id, svg }) => (
-          svg && (
-            <div 
-              key={id}
-              className="absolute inset-0 pointer-events-none animate-fade-in transition-opacity duration-300"
-              style={{
-                backgroundImage: `url("${svg}")`,
-                backgroundSize: '100% 100%',
-              }}
-            />
-          )
-        ))}
-        <div className={`grid grid-cols-10 gap-1 sm:gap-1.5 relative ${phase === "random" ? "animate-shuffle" : ""}`}
+                <div className={`grid grid-cols-10 gap-1 sm:gap-1.5 relative ${phase === "random" ? "animate-shuffle" : ""}`}
                style={{
             "--shuffle-x": `${shuffleX}px`,
             "--shuffle-y": `${shuffleY}px`,
