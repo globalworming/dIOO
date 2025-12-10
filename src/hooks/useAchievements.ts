@@ -14,6 +14,7 @@ export interface GameStats {
   totalNaturalSum: number;
   totalRolls: number;
   totalModifiedRolls: number;
+  colorTotals: Record<string, number>;
 }
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
@@ -27,6 +28,7 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: "sum-1000", name: "Thousandaire", description: "Total sum of 1000", unlocked: false },
   { id: "sum-10000", name: "Googol Seeker", description: "Total sum of 10000", unlocked: false },
   { id: "first-mod", name: "Modifier Rookie", description: "Use a modifier for the first time", unlocked: false },
+  { id: "mixer", name: "Mixer", description: "Collect 100+ points with 3 different colors", unlocked: false },
 ];
 
 const STORAGE_KEY = "d100-game-state";
@@ -42,6 +44,7 @@ const DEFAULT_STATS: GameStats = {
   totalNaturalSum: 0,
   totalRolls: 0,
   totalModifiedRolls: 0,
+  colorTotals: {},
 };
 
 export const useAchievements = () => {
@@ -129,6 +132,13 @@ export const useAchievements = () => {
         unlockAchievement("sum-10000");
         newlyUnlocked.push("Googol Seeker");
       }
+      
+      // Check mixer achievement
+      const qualifyingColors = Object.values(newStats.colorTotals || {}).filter(total => total >= 100).length;
+      if (qualifyingColors >= 3 && !achievements.find((a) => a.id === "mixer")?.unlocked) {
+        unlockAchievement("mixer");
+        newlyUnlocked.push("Mixer");
+      }
 
       return newlyUnlocked;
     },
@@ -136,15 +146,23 @@ export const useAchievements = () => {
   );
 
   const recordRoll = useCallback(
-    (naturalRoll: number, modifiedRoll: number, hasModifiers: boolean) => {
+    (naturalRoll: number, modifiedRoll: number, hasModifiers: boolean, bonuses: { color: string; bonus: number }[] = []) => {
+      
+      const newColorTotals = { ...stats.colorTotals };
+      bonuses.forEach(({ color, bonus }) => {
+        newColorTotals[color] = (newColorTotals[color] || 0) + bonus;
+      });
+      
       const newStats: GameStats = {
         highestRoll: Math.max(stats.highestRoll, modifiedRoll),
         totalSum: stats.totalSum + modifiedRoll,
         totalNaturalSum: stats.totalNaturalSum + naturalRoll,
         totalRolls: stats.totalRolls + 1,
         totalModifiedRolls: hasModifiers ? stats.totalModifiedRolls + 1 : stats.totalModifiedRolls,
+        colorTotals: newColorTotals,
       };
       setStats(newStats);
+      console.log("new stats", newStats);
       return checkAchievements(naturalRoll, modifiedRoll, hasModifiers, newStats);
     },
     [stats, checkAchievements]

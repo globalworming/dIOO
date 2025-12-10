@@ -32,32 +32,49 @@ export const AchievementPanel = ({
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
 
-        <div className="flex items-center gap-3 mb-6">
-          <Trophy className="w-6 h-6 text-primary" />
-          <h2 className="text-xl font-semibold">Achievements</h2>
+        <div className="flex items-center gap-3 mb-2">
+          <Trophy className="w-4 h-4 text-primary" />
+          <h2 className="text-l font-semibold">Achievements</h2>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-1 mb-2">
           <div className="glass rounded-lg p-3 text-center">
             <div className="text-2xl font-bold mono text-primary">
             {unlockedCount}/{achievements.length}
             </div>
-            <div className="text-xs text-muted-foreground">Unlocked</div>
+            <div className="text-xs">Unlocked</div>
           </div>
           <div className="glass rounded-lg p-3 text-center">
             <div className="text-2xl font-bold mono text-primary">{stats.highestRoll}</div>
-            <div className="text-xs text-muted-foreground">Highest Roll</div>
+            <div className="text-xs">Highest Roll</div>
           </div>
           <div className="glass rounded-lg p-3 text-center">
             <div className="text-2xl font-bold mono text-primary">{stats.totalSum.toLocaleString()}</div>
-            <div className="text-xs text-muted-foreground">Total Sum</div>
+            <div className="text-xs">Total Sum</div>
           </div>
           <div className="glass rounded-lg p-3 text-center">
             <div className="text-2xl font-bold mono text-primary">{stats.totalRolls}</div>
-            <div className="text-xs text-muted-foreground">Total Rolls</div>
+            <div className="text-xs">Total Rolls</div>
           </div>
         </div>
+
+        {/* Color Stats */}
+        {stats.colorTotals && Object.keys(stats.colorTotals).length > 0 && (
+          <div className="mb-2">
+            <div className="grid grid-cols-4 gap-2">
+              {Object.entries(stats.colorTotals).map(([color, total]) => (
+                <div key={color} className="glass rounded-lg p-2 flex flex-col items-center gap-1">
+                  <div 
+                    className="w-4 h-4 rounded-full border border-white/20 shadow-sm" 
+                    style={{ backgroundColor: color }} 
+                  />
+                  <div className="text-sm font-bold mono">{total}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Achievement List */}
         <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
@@ -87,7 +104,7 @@ export const AchievementPanel = ({
                 <div className={cn("font-medium text-sm", !achievement.unlocked && "text-muted-foreground")}>
                   {achievement.name}
                 </div>
-                <div className="text-xs text-muted-foreground">{achievement.description}</div>
+                <div className="text-xs">{achievement.description}</div>
               </div>
             </div>
           ))}

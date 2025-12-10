@@ -130,7 +130,7 @@ export const D100Roller = () => {
               setPhase("sorted");
               
               // Record with modifiers
-              const newlyUnlocked = recordRoll(rolledResult, rolledResult + totalBonus, true);
+              const newlyUnlocked = recordRoll(rolledResult, rolledResult + totalBonus, true, bonuses);
               newlyUnlocked.forEach((name) => {
                 toast.success(`Achievement Unlocked: ${name}!`, { duration: 3000 });
               });
