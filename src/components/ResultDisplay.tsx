@@ -13,7 +13,10 @@ export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses =
   const displayValue = showModified ? modifiedResult : result;
   
   return (
-    <div className="text-center rounded-lg mb-8 p-2 relative z-10 bg-black/50">
+    <div 
+      className="text-center mb-4 p-2 relative"
+      aria-label={displayValue !== null ? `Result: ${displayValue}` : "Result display"}
+    >
       <div
         className={cn(
           "result-display text-primary text-glow transition-all duration-500",

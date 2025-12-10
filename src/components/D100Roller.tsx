@@ -178,7 +178,10 @@ export const D100Roller = () => {
   const isRolling = phase === "random" || phase === "sorting" || phase === "modifying";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col ">
+    <div 
+      className="min-h-screen bg-background flex flex-col"
+      aria-label="D100 Dice Roller Game"
+    >
       <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
       <AchievementButton
         onClick={() => setAchievementPanelOpen(true)}
