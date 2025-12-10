@@ -62,16 +62,16 @@ const MODIFIER_BACKGROUNDS: Record<string, string> = {
 
 export const ModifierPanel = ({ modifiers, onToggle, disabled }: ModifierPanelProps) => {
   return (
-    <div className="flex flex-row gap-2">
+    <div className="flex flex-row gap-2" aria-label="Modifier Panel - Convictions">
       {modifiers.map((mod) => (
         <Button
           key={mod.id}
-          variant={mod.active ? "secondary" : "outline"}
+          variant={"link"}
           size="sm"
-          className={`w-10 h-10 p-0 transition-all duration-300 relative overflow-hidden ${
+          className={`w-10 h-10 p-0 transition-all duration-100 relative overflow-hidden ${
             mod.active 
-              ? "ring-2 ring-primary/50 shadow-lg shadow-primary/20" 
-              : "opacity-60 hover:opacity-100"
+              ? "ring-2 ring-primary" 
+              : "ring-1 ring-background hover:ring-4 hover:ring-primary/20"
           }`}
           onClick={() => onToggle(mod.id)}
           disabled={disabled}
