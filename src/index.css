@@ -95,16 +95,6 @@
   }
 }
 
-@keyframes pulse-dot {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1);
-  }
-}
 
 
 @keyframes fade-in-up {
@@ -121,10 +111,6 @@
 
 .animate-fade-in-up {
   animation: fade-in-up 0.3s ease-out;
-}
-
-.animate-pulse-dot {
-  animation: pulse-dot 2s ease-in-out infinite;
 }
 
 @keyframes shuffle {
