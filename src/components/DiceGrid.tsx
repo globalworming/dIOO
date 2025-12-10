@@ -17,11 +17,11 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
   const isHighRoll = displayResult && displayResult >= 80;
   const isPerfect = displayResult === 100 || (modifiedResult && modifiedResult >= 100);
   const isLowRoll = displayResult && displayResult <= 20;
-  
+
   // Get active modifier zones with colors
   const activeModifiers = modifiers.filter(m => m.active);
   const highlightedZones = new Set(activeModifiers.flatMap(m => m.zones));
-  
+
   // Map each zone index to its modifier color (first active modifier wins)
   const getModifierColor = (index: number): string | undefined => {
     for (const mod of activeModifiers) {
@@ -61,14 +61,14 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
   // Dynamic border style based on result (more performant than box-shadow)
   const isResultPhase = phase === "sorted" || phase === "modifying";
   const gridGlowStyle = isResultPhase && displayResult ? {
-    borderWidth: isPerfect 
+    borderWidth: isPerfect
       ? '3px'
       : isHighRoll
         ? `${1 + intensity * 2}px`
         : isLowRoll
           ? '1px'
           : '0px',
-    borderColor: isPerfect 
+    borderColor: isPerfect
       ? 'hsl(var(--primary) / 0.9)'
       : isHighRoll
         ? `hsl(var(--primary) / ${0.5 + 0.3 * intensity})`
@@ -77,19 +77,34 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
           : 'transparent',
   } as React.CSSProperties : {};
 
+
+  const cssScale = (() => {
+    switch (phase) {
+      case "sorted":
+      case "modifying":
+        if (isPerfect) return "scale-115";
+        if (isHighRoll) return "scale-110";
+        return "scale-105";
+      case "idle":
+        return "scale-100";
+      default:
+        return "scale-90";
+    }
+  })();
+
   return (
     <div className="p-2">
-      <div 
-        className={`relative w-full max-w-lg mx-auto cursor-pointer rounded-lg ${
-          isPerfect ? "animate-perfect-glow" : ""
-        } ${isHighRoll && !isPerfect ? "animate-high-roll-pulse" : ""}
-        transition-transform ${isResultPhase ? isHighRoll ? "scale-105" : isPerfect ? "scale-110" : "scale-100" : "scale-90"}
+      <div
+        aria-label={displayResult != null ? `Dice grid with result ${displayResult}` : "Dice grid"}
+        className={`relative w-full max-w-lg mx-auto cursor-pointer rounded-lg ${isPerfect ? "animate-perfect-glow" : ""
+          } ${isHighRoll && !isPerfect ? "animate-high-roll-pulse" : ""}
+        transition-transform ${cssScale}
         `}
         style={gridGlowStyle}
         onClick={onClick && (phase === "idle" || phase === "sorted") ? onClick : undefined}
       >
         {/* Crosshair overlay */}
-        <div 
+        <div
           className={`absolute inset-0 ${phase === "random" ? "animate-shuffle" : ""}`}
           style={{
             backgroundImage: `url("${crosshairSvg}")`,
@@ -101,11 +116,11 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
             "--shuffle-r": `${shuffleR}deg`,
           } as React.CSSProperties}
         />
-                <div className={`grid grid-cols-10 gap-1 sm:gap-1.5 relative ${phase === "random" ? "animate-shuffle" : ""}`}
-               style={{
-            "--shuffle-x": `${shuffleX*0.2}px`,
-            "--shuffle-y": `${shuffleY*0.2}px`,
-             "--shuffle-r": `${shuffleR}deg`,
+        <div className={`grid grid-cols-10 gap-1 sm:gap-1.5 relative ${phase === "random" ? "animate-shuffle" : ""}`}
+          style={{
+            "--shuffle-x": `${shuffleX * 0.2}px`,
+            "--shuffle-y": `${shuffleY * 0.2}px`,
+            "--shuffle-r": `${shuffleR}deg`,
           } as React.CSSProperties}
         >
           {items.map((hasDot, index) => (
