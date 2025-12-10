@@ -145,6 +145,17 @@ export const D100Roller = () => {
     }, 140);
   }, [phase, hasActiveModifiers, modifiers, recordRoll]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Enter' && !e.repeat) {
+        roll();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [roll]);
+
   // Fullscreen handling
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
