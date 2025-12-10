@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { DiceGrid } from "./DiceGrid";
 import { ResultDisplay } from "./ResultDisplay";
-import { RollHistory } from "./RollHistory";
 import { FullscreenButton } from "./FullscreenButton";
 import { AchievementButton } from "./AchievementButton";
 import { AchievementPanel } from "./AchievementPanel";
@@ -69,8 +68,6 @@ export const D100Roller = () => {
   const [result, setResult] = useState<number | null>(initialResult);
   const [modifiedResult, setModifiedResult] = useState<number | null>(null);
   const [modifierBonuses, setModifierBonuses] = useState<ModifierBonus[]>([]);
-  const [history, setHistory] = useState<number[]>([]);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [achievementPanelOpen, setAchievementPanelOpen] = useState(false);
   const [modifiers, setModifiers] = useState<Modifier[]>(DEFAULT_MODIFIERS);
@@ -115,7 +112,6 @@ export const D100Roller = () => {
         // Step 5: Complete sorting - show natural result
         setTimeout(() => {
           setResult(rolledResult);
-          setHistory((prev) => [rolledResult, ...prev]);
           
           // Step 6: If modifiers active, enter modifying phase
           if (hasActiveModifiers) {
@@ -171,13 +167,8 @@ export const D100Roller = () => {
   const isRolling = phase === "random" || phase === "sorting" || phase === "modifying";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex flex-col ">
       <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
-      <RollHistory
-        history={history}
-        isOpen={historyOpen}
-        onToggle={() => setHistoryOpen(!historyOpen)}
-      />
       <AchievementButton
         onClick={() => setAchievementPanelOpen(true)}
         unlockedCount={achievements.filter((a) => a.unlocked).length}
