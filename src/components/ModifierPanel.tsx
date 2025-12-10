@@ -1,10 +1,8 @@
 import { Button } from "./ui/button";
-import { Grid3X3, Target, Layers, Zap } from "lucide-react";
 
 export interface Modifier {
   id: string;
   name: string;
-  icon: React.ReactNode;
   description: string;
   active: boolean;
   zones: number[]; // indices 0-99 that score bonus
@@ -131,7 +129,6 @@ export const DEFAULT_MODIFIERS: Modifier[] = [
   {
     id: "corners",
     name: "Corners",
-    icon: <Grid3X3 size={18} />,
     description: "Dots in corners score +1",
     active: false,
     zones: createCornerZones(),
@@ -139,7 +136,6 @@ export const DEFAULT_MODIFIERS: Modifier[] = [
   {
     id: "bullseye",
     name: "Bullseye",
-    icon: <Target size={18} />,
     description: "Dots in center score +1",
     active: false,
     zones: createCenterZones(),
@@ -147,7 +143,6 @@ export const DEFAULT_MODIFIERS: Modifier[] = [
   {
     id: "diagonals",
     name: "Diagonals",
-    icon: <Layers size={18} />,
     description: "Dots on diagonals score +1",
     active: false,
     zones: createDiagonalZones(),
@@ -155,7 +150,6 @@ export const DEFAULT_MODIFIERS: Modifier[] = [
   {
     id: "cross",
     name: "Cross",
-    icon: <Zap size={18} />,
     description: "Dots on cross score +1",
     active: false,
     zones: createCrossZones(),
