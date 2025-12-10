@@ -123,6 +123,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
             "--shuffle-r": `${shuffleR}deg`,
           } as React.CSSProperties}
         >
+          {/* fixme later, on high rolls, wave effect through offset transform x the rows and columns */}
           {items.map((hasDot, index) => (
             <DiceItem
               key={index}
