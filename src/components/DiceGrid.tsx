@@ -58,24 +58,33 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
     </svg>
   `)}`;
 
-  // Dynamic glow style based on result
+  // Dynamic border style based on result (more performant than box-shadow)
   const isResultPhase = phase === "sorted" || phase === "modifying";
   const gridGlowStyle = isResultPhase && displayResult ? {
-    boxShadow: isPerfect 
-      ? `0 0 60px hsl(var(--primary) / 0.8), 0 0 120px hsl(var(--primary) / 0.4), 0 0 180px hsl(var(--primary) / 0.2)`
+    borderWidth: isPerfect 
+      ? '3px'
       : isHighRoll
-        ? `0 0 ${30 * intensity}px hsl(var(--primary) / ${0.4 * intensity}), 0 0 ${60 * intensity}px hsl(var(--primary) / ${0.2 * intensity})`
+        ? `${1 + intensity * 2}px`
         : isLowRoll
-          ? `0 0 20px hsl(var(--muted) / 0.3)`
-          : undefined,
-  } : {};
+          ? '1px'
+          : '0px',
+    borderColor: isPerfect 
+      ? 'hsl(var(--primary) / 0.9)'
+      : isHighRoll
+        ? `hsl(var(--primary) / ${0.5 + 0.3 * intensity})`
+        : isLowRoll
+          ? 'hsl(var(--muted) / 0.4)'
+          : 'transparent',
+  } as React.CSSProperties : {};
 
   return (
     <div className="p-2">
       <div 
-        className={`relative w-full max-w-lg mx-auto cursor-pointer transition-all duration-700 rounded-lg ${
+        className={`relative w-full max-w-lg mx-auto cursor-pointer rounded-lg ${
           isPerfect ? "animate-perfect-glow" : ""
-        } ${isHighRoll && !isPerfect ? "animate-high-roll-pulse" : ""}`}
+        } ${isHighRoll && !isPerfect ? "animate-high-roll-pulse" : ""}
+        transition-transform ${isResultPhase ? isHighRoll ? "scale-105" : isPerfect ? "scale-110" : "scale-100" : "scale-90"}
+        `}
         style={gridGlowStyle}
         onClick={onClick && (phase === "idle" || phase === "sorted") ? onClick : undefined}
       >

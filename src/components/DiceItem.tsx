@@ -27,7 +27,7 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
       {hasDot && (
         <div
           className={cn(
-            "w-2 h-2 sm:w-3 sm:h-3 rounded-full dot-glow transition-colors duration-300",
+            "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors duration-100",
             (phase === "sorted" || phase === "modifying"),
             highlighted && hasDot && "scale-110",
             !modifierColor && "bg-primary"
@@ -35,7 +35,6 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
           style={{
             animationDelay: `${sortedIndex * 20}ms`,
             backgroundColor: modifierColor,
-            boxShadow: modifierColor ? `0 0 8px ${modifierColor}` : undefined,
           }}
         />
       )}
