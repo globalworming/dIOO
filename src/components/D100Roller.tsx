@@ -4,12 +4,13 @@ import { ResultDisplay } from "./ResultDisplay";
 import { FullscreenButton } from "./FullscreenButton";
 import { AchievementButton } from "./AchievementButton";
 import { AchievementPanel } from "./AchievementPanel";
-import { ModifierPanel, DEFAULT_MODIFIERS, Modifier, ModifierBonus, MODIFIER_COLORS } from "./ModifierPanel";
-import { SkillsPanel, DEFAULT_SKILLS, Skill } from "./SkillsPanel";
+import { ModifierPanel, DEFAULT_MODIFIERS, Modifier, ModifierBonus, MODIFIER_COLORS, getModifierColor } from "./ModifierPanel";
+import { SkillsPanel, DEFAULT_SKILLS, Skill, SKILL_PATTERNS } from "./SkillsPanel";
 import { useAchievements } from "@/hooks/useAchievements";
+import { calculateSkillBonuses, handleAchievements, aggregateBonuses } from "@/utils/gameLogic";
 import { toast } from "sonner";
 
-type Phase = "idle" | "random" | "sorting" | "sorted" | "modifying";
+type Phase = "idle" | "random" | "sorting" | "sorted" | "modifying" | "skilling";
 
 // Generate items with exactly `count` dots randomly distributed
 const generateItemsWithDots = (count: number): boolean[] => {
@@ -55,7 +56,6 @@ const calculateModifierBonuses = (
       }
     }
     return {
-      id: mod.id,
       color: MODIFIER_COLORS[mod.id],
       bonus,
     };
@@ -128,25 +128,60 @@ export const D100Roller = () => {
             // Calculate and show modified result after brief delay
             setTimeout(() => {
               const bonuses = calculateModifierBonuses(finalItems, modifiers);
-              const totalBonus = bonuses.reduce((sum, b) => sum + b.bonus, 0);
+              let totalBonus = bonuses.reduce((sum, b) => sum + b.bonus, 0);
+              
+              // Apply modifier bonuses first
               setModifierBonuses(bonuses);
               setModifiedResult(rolledResult + totalBonus);
-              setPhase("sorted");
               
-              // Record with modifiers
-              const newlyUnlocked = recordRoll(rolledResult, rolledResult + totalBonus, true, bonuses);
-              newlyUnlocked.forEach((name) => {
-                toast.success(`Achievement Unlocked: ${name}!`, { duration: 3000 });
-              });
+              // Check for skills
+              const activeSkills = skills.filter(s => s.active);
+              if (activeSkills.length > 0) {
+                setPhase("skilling");
+                
+                // Delay for skill processing visualization
+                setTimeout(() => {
+                  const activeMods = modifiers.filter(m => m.active);
+                  
+                  const { skillBonuses, totalSkillBonus, triggeredSkills } = calculateSkillBonuses(
+                    finalItems, 
+                    skills, 
+                    activeMods
+                  );
+                  
+                  // Update skills triggered state
+                  if (triggeredSkills.size > 0) {
+                    setSkills(prev => prev.map(s => ({
+                      ...s,
+                      triggered: triggeredSkills.has(s.id)
+                    })));
+                    setTimeout(() => {
+                      setSkills(prev => prev.map(s => ({ ...s, triggered: false })));
+                    }, 1000);
+                  }
+                  
+                  const allBonuses = [...bonuses, ...skillBonuses];
+                  const finalBonuses = aggregateBonuses(allBonuses);
+                  const finalTotalResult = rolledResult + totalBonus + totalSkillBonus;
+                  
+                  setModifierBonuses(finalBonuses);
+                  setModifiedResult(finalTotalResult);
+                  setPhase("sorted");
+                  
+                  // Record roll
+                  handleAchievements(rolledResult, finalTotalResult, true, finalBonuses, recordRoll);
+                }, 600); // Wait in skilling phase
+              } else {
+                setPhase("sorted");
+                // Record with modifiers only
+                handleAchievements(rolledResult, rolledResult + totalBonus, true, bonuses, recordRoll);
+              }
             }, 600);
           } else {
             setPhase("sorted");
             
             // Record without modifiers
-            const newlyUnlocked = recordRoll(rolledResult, rolledResult, false);
-            newlyUnlocked.forEach((name) => {
-              toast.success(`Achievement Unlocked: ${name}!`, { duration: 3000 });
-            });
+            handleAchievements(rolledResult, rolledResult, false, [], recordRoll);
           }
         }, 1200 - 10 * rolledResult);
       }
@@ -229,12 +264,14 @@ export const D100Roller = () => {
               disabled={isRolling}
             />
           </div>
-          <div className="flex justify-center">
-            <SkillsPanel 
-              skills={skills} 
-              onToggle={toggleSkill}
-              disabled={isRolling}
-            />
+          <div hidden={true}>
+            <div className="flex justify-center">
+              <SkillsPanel 
+                skills={skills} 
+                onToggle={toggleSkill}
+                disabled={isRolling}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ export interface Skill {
   name: string;
   active: boolean;
   svg: string;
+  triggered?: boolean;
 }
 
 interface SkillsPanelProps {
@@ -14,11 +15,48 @@ interface SkillsPanelProps {
 }
 
 // Reuse colors from ModifierPanel as requested
-const COLORS = {
+export const SKILL_COLORS = {
   bullseye: "hsl(0, 85%, 55%)",
   cross: "hsl(180, 85%, 45%)",
   corners: "hsl(38, 95%, 55%)",
   diagonals: "hsl(280, 85%, 55%)",
+};
+
+export const SKILL_PATTERNS: Record<string, { width: number; height: number; offsets: { r: number; c: number }[]; color: string }> = {
+  skill_small_x: {
+    width: 3,
+    height: 3,
+    offsets: [
+      { r: 0, c: 0 }, { r: 0, c: 2 },
+      { r: 1, c: 1 },
+      { r: 2, c: 0 }, { r: 2, c: 2 },
+    ],
+    color: SKILL_COLORS.bullseye,
+  },
+  skill_h_line: {
+    width: 10,
+    height: 1,
+    offsets: Array.from({ length: 10 }, (_, i) => ({ r: 0, c: i })),
+    color: SKILL_COLORS.cross,
+  },
+  skill_2x2: {
+    width: 2,
+    height: 2,
+    offsets: [
+      { r: 0, c: 0 }, { r: 0, c: 1 },
+      { r: 1, c: 0 }, { r: 1, c: 1 },
+    ],
+    color: SKILL_COLORS.corners,
+  },
+  skill_1x2: {
+    width: 1,
+    height: 2,
+    offsets: [
+      { r: 0, c: 0 },
+      { r: 1, c: 0 },
+    ],
+    color: SKILL_COLORS.diagonals,
+  },
 };
 
 // SVGs based on 10x10 grid (viewBox 0 0 100 100)
@@ -26,32 +64,26 @@ const COLORS = {
 const SKILL_SVGS: Record<string, string> = {
   smallX: `data:image/svg+xml;base64,${btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <!-- 3x3 small x in center? user asked for small x, 3x3, color like bullseye -->
-      <!-- Let's center it: 3x3 grid means 30x30 units. Center is at 35,35 to 65,65 -->
-      <line x1="35" y1="35" x2="65" y2="65" stroke="${COLORS.bullseye}" stroke-width="5" stroke-linecap="round"/>
-      <line x1="65" y1="35" x2="35" y2="65" stroke="${COLORS.bullseye}" stroke-width="5" stroke-linecap="round"/>
+      <line x1="35" y1="35" x2="65" y2="65" stroke="${SKILL_COLORS.bullseye}" stroke-width="5" stroke-linecap="round"/>
+      <line x1="65" y1="35" x2="35" y2="65" stroke="${SKILL_COLORS.bullseye}" stroke-width="5" stroke-linecap="round"/>
     </svg>
   `)}`,
   
   horizontalLine: `data:image/svg+xml;base64,${btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <!-- horizontal line colored like cross -->
-      <!-- Centered horizontal line across the grid -->
-      <line x1="0" y1="50" x2="100" y2="50" stroke="${COLORS.cross}" stroke-width="10"/>
+      <line x1="0" y1="50" x2="100" y2="50" stroke="${SKILL_COLORS.cross}" stroke-width="10"/>
     </svg>
   `)}`,
   
   block2x2: `data:image/svg+xml;base64,${btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <!-- 2x2 block colored like corners -->
-      <!-- 2x2 is 20x20 units. Centered: 40,40 to 60,60 -->
-      <rect x="40" y="40" width="20" height="20" fill="${COLORS.corners}" />
+      <rect x="40" y="40" width="20" height="20" fill="${SKILL_COLORS.corners}" />
     </svg>
   `)}`,
   
   block1x2: `data:image/svg+xml;base64,${btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="40" y="45" width="10" height="20" fill="${COLORS.diagonals}" />
+      <rect x="40" y="45" width="10" height="20" fill="${SKILL_COLORS.diagonals}" />
     </svg>
   `)}`,
 };
@@ -91,11 +123,11 @@ export const SkillsPanel = ({ skills, onToggle, disabled }: SkillsPanelProps) =>
           key={skill.id}
           variant={"link"}
           size="sm"
-          className={`w-10 h-10 p-0 transition-all duration-100 relative overflow-hidden ${
+          className={`w-10 h-10 p-0 transition-all duration-700 relative overflow-hidden ${
             skill.active 
               ? "ring-2 ring-primary" 
               : "ring-1 ring-background hover:ring-4 hover:ring-primary/20"
-          }`}
+          } ${skill.triggered ? "animate-ping duration-2000" : ""}`}
           onClick={() => onToggle(skill.id)}
           disabled={disabled}
           title={skill.name}

@@ -162,7 +162,6 @@ export const useAchievements = () => {
         colorTotals: newColorTotals,
       };
       setStats(newStats);
-      console.log("new stats", newStats);
       return checkAchievements(naturalRoll, modifiedRoll, hasModifiers, newStats);
     },
     [stats, checkAchievements]

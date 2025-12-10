@@ -3,7 +3,7 @@ import { ModifierBonus } from "./ModifierPanel";
 
 interface ResultDisplayProps {
   result: number | null;
-  phase: "idle" | "random" | "sorting" | "sorted" | "modifying";
+  phase: "idle" | "random" | "sorting" | "sorted" | "modifying" | "skilling";
   modifiedResult?: number | null;
   modifierBonuses?: ModifierBonus[];
 }
@@ -32,8 +32,8 @@ export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses =
         {showModified ? (
           <div className="flex items-center gap-1 animate-fade-in-up">
             <span className="text-white">{result}</span>
-            {modifierBonuses.map((bonus) => (
-              <span key={bonus.id} style={{ color: bonus.color }}>+{bonus.bonus}</span>
+            {modifierBonuses.map((bonus, idx) => (
+              <span key={`${bonus.color}-${idx}`} style={{ color: bonus.color }}>+{bonus.bonus}</span>
             ))}
           </div>
         ) : (

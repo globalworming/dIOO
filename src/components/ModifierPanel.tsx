@@ -16,8 +16,16 @@ export const MODIFIER_COLORS: Record<string, string> = {
   cross: "hsl(180, 85%, 45%)",
 };
 
+export const getModifierColor = (index: number, activeModifiers: Modifier[]): string | undefined => {
+  for (const mod of activeModifiers) {
+    if (mod.zones.includes(index)) {
+      return MODIFIER_COLORS[mod.id];
+    }
+  }
+  return undefined;
+};
+
 export interface ModifierBonus {
-  id: string;
   color: string;
   bonus: number;
 }

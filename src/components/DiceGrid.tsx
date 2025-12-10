@@ -1,9 +1,9 @@
 import { DiceItem } from "./DiceItem";
-import { Modifier, MODIFIER_COLORS } from "./ModifierPanel";
+import { Modifier, MODIFIER_COLORS, getModifierColor } from "./ModifierPanel";
 
 interface DiceGridProps {
   items: boolean[];
-  phase: "idle" | "random" | "sorting" | "sorted" | "modifying";
+  phase: "idle" | "random" | "sorting" | "sorted" | "modifying" | "skilling";
   onClick?: () => void;
   result?: number | null;
   modifiers?: Modifier[];
@@ -22,15 +22,6 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
   const activeModifiers = modifiers.filter(m => m.active);
   const highlightedZones = new Set(activeModifiers.flatMap(m => m.zones));
 
-  // Map each zone index to its modifier color (first active modifier wins)
-  const getModifierColor = (index: number): string | undefined => {
-    for (const mod of activeModifiers) {
-      if (mod.zones.includes(index)) {
-        return MODIFIER_COLORS[mod.id];
-      }
-    }
-    return undefined;
-  };
   // Create sorted indices - falses first, then trues
   const sortedIndices = items
     .map((hasDot, originalIndex) => ({ hasDot, originalIndex }))
@@ -59,7 +50,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
   `)}`;
 
   // Dynamic border style based on result (more performant than box-shadow)
-  const isResultPhase = phase === "sorted" || phase === "modifying";
+  const isResultPhase = phase === "sorted" || phase === "modifying" || phase === "skilling";
   const gridGlowStyle = isResultPhase && displayResult ? {
     borderWidth: isPerfect
       ? '3px'
@@ -82,6 +73,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
     switch (phase) {
       case "sorted":
       case "modifying":
+      case "skilling":
         if (isPerfect) return "scale-115";
         if (isHighRoll) return "scale-110";
         return "scale-105";
@@ -132,7 +124,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
               phase={phase === "idle" ? "sorted" : phase}
               sortedIndex={getSortedIndex(index)}
               highlighted={highlightedZones.has(index)}
-              modifierColor={getModifierColor(index)}
+              modifierColor={getModifierColor(index, activeModifiers)}
             />
           ))}
         </div>
