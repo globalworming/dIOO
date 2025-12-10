@@ -103,9 +103,9 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
         />
                 <div className={`grid grid-cols-10 gap-1 sm:gap-1.5 relative ${phase === "random" ? "animate-shuffle" : ""}`}
                style={{
-            "--shuffle-x": `${shuffleX}px`,
-            "--shuffle-y": `${shuffleY}px`,
-            "--shuffle-r": `0deg`,
+            "--shuffle-x": `${shuffleX*0.2}px`,
+            "--shuffle-y": `${shuffleY*0.2}px`,
+             "--shuffle-r": `${shuffleR}deg`,
           } as React.CSSProperties}
         >
           {items.map((hasDot, index) => (
