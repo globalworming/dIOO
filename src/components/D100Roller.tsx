@@ -5,6 +5,7 @@ import { FullscreenButton } from "./FullscreenButton";
 import { AchievementButton } from "./AchievementButton";
 import { AchievementPanel } from "./AchievementPanel";
 import { ModifierPanel, DEFAULT_MODIFIERS, Modifier, ModifierBonus, MODIFIER_COLORS } from "./ModifierPanel";
+import { SkillsPanel, DEFAULT_SKILLS, Skill } from "./SkillsPanel";
 import { useAchievements } from "@/hooks/useAchievements";
 import { toast } from "sonner";
 
@@ -71,6 +72,7 @@ export const D100Roller = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [achievementPanelOpen, setAchievementPanelOpen] = useState(false);
   const [modifiers, setModifiers] = useState<Modifier[]>(DEFAULT_MODIFIERS);
+  const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   
   const { achievements, stats, recordRoll, resetGame } = useAchievements();
 
@@ -79,6 +81,12 @@ export const D100Roller = () => {
   const toggleModifier = useCallback((id: string) => {
     setModifiers(prev => prev.map(m => 
       m.id === id ? { ...m, active: !m.active } : m
+    ));
+  }, []);
+
+  const toggleSkill = useCallback((id: string) => {
+    setSkills(prev => prev.map(s => 
+      s.id === id ? { ...s, active: !s.active } : s
     ));
   }, []);
 
@@ -213,12 +221,21 @@ export const D100Roller = () => {
         />
         
         {/* Modifier panel below grid */}
-        <div className="flex justify-center mt-4">
-          <ModifierPanel 
-            modifiers={modifiers} 
-            onToggle={toggleModifier}
-            disabled={isRolling}
-          />
+        <div className="flex flex-col justify-center mt-4 gap-4">
+          <div className="flex justify-center">
+            <ModifierPanel 
+              modifiers={modifiers} 
+              onToggle={toggleModifier}
+              disabled={isRolling}
+            />
+          </div>
+          <div className="flex justify-center">
+            <SkillsPanel 
+              skills={skills} 
+              onToggle={toggleSkill}
+              disabled={isRolling}
+            />
+          </div>
         </div>
       </div>
     </div>
