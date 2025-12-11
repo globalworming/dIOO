@@ -15,9 +15,9 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
     <div
       className={cn(
         "w-full aspect-square rounded-sm flex items-center justify-center transition-all duration-500",
-        "bg-secondary/50 border border-border/30",
+        "bg-secondary/50  ring ring-4 ring-inset ring-secondary/10",
         phase === "sorting" && "transition-all duration-700 ease-out",
-        highlighted && "ring-1 ring-primary/40 bg-secondary/70"
+        highlighted && "ring-primary/10 bg-secondary/60"
       )}
       style={{
         transitionDelay: phase === "sorting" ? `${sortedIndex * 8}ms` : "0ms",
@@ -27,9 +27,9 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
       {hasDot && (
         <div
           className={cn(
-            "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors duration-100",
+            "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-background transition-scale duration-500",
             (phase === "sorted" || phase === "modifying" || phase === "skilling"),
-            highlighted && hasDot && "scale-110",
+            highlighted && hasDot && "[scale:1.7]",
             !modifierColor && "bg-primary"
           )}
           style={{

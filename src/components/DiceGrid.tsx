@@ -74,23 +74,23 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
       case "sorted":
       case "modifying":
       case "skilling":
-        if (isPerfect) return "scale-115";
-        if (isHighRoll) return "scale-110";
-        return "scale-105";
+        if (isPerfect) return "[scale:1.0]";
+        if (isHighRoll) return "[scale:0.95]";
+        return "[scale:0.90]";
       case "idle":
-        return "scale-100";
+        return "[scale:0.85]";
       default:
-        return "scale-90";
+        return "[scale:0.80]";
     }
   })();
 
   return (
-    <div className="p-2">
+    <div>
       <div
         aria-label={displayResult != null ? `Dice grid with result ${displayResult}` : "Dice grid"}
-        className={`relative w-full max-w-lg mx-auto cursor-pointer rounded-lg ${isPerfect ? "animate-perfect-glow" : ""
+        className={`relative w-full  mx-auto cursor-pointer rounded-lg ${isPerfect ? "animate-perfect-glow" : ""
           } ${isHighRoll && !isPerfect ? "animate-high-roll-pulse" : ""}
-        transition-transform ${cssScale}
+        transition-scale ease-in-out duration-100 ${cssScale}
         `}
         style={gridGlowStyle}
         onClick={onClick && (phase === "idle" || phase === "sorted") ? onClick : undefined}
