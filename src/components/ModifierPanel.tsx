@@ -16,13 +16,22 @@ export const MODIFIER_COLORS: Record<string, string> = {
   cross: "hsl(180, 85%, 45%)",
 };
 
-export const getModifierColor = (index: number, activeModifiers: Modifier[]): string | undefined => {
+
+/**
+ * Pre-build a 100-element color map from active modifiers.
+ * First modifier to claim an index wins (same priority as getModifierColor).
+ */
+export const buildModifierColorMap = (activeModifiers: Modifier[]): (string | undefined)[] => {
+  const colors: (string | undefined)[] = new Array(100).fill(undefined);
   for (const mod of activeModifiers) {
-    if (mod.zones.includes(index)) {
-      return MODIFIER_COLORS[mod.id];
+    const color = MODIFIER_COLORS[mod.id];
+    for (const idx of mod.zones) {
+      if (colors[idx] === undefined) {
+        colors[idx] = color;
+      }
     }
   }
-  return undefined;
+  return colors;
 };
 
 export interface ModifierBonus {

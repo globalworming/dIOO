@@ -17,19 +17,106 @@ export interface GameStats {
   colorTotals: Record<string, number>;
 }
 
-const DEFAULT_ACHIEVEMENTS: Achievement[] = [
-  { id: "reach-100", name: "Perfect Roll", description: "Roll a natural 100", unlocked: false, requiresNatural: true },
-  { id: "reach-1", name: "Snake Eyes", description: "Roll a natural 1", unlocked: false, requiresNatural: true },
-  { id: "modified-100", name: "Boosted Century", description: "Reach 100+ with modifiers", unlocked: false },
-  { id: "ten-rolls", name: "Getting Started", description: "Roll 10 times", unlocked: false },
-  { id: "fifty-rolls", name: "Dedicated Roller", description: "Roll 50 times", unlocked: false },
-  { id: "hundred-rolls", name: "Century Club", description: "Roll 100 times", unlocked: false },
-  { id: "sum-100", name: "First Hundred", description: "Total sum of 100", unlocked: false },
-  { id: "sum-1000", name: "Thousandaire", description: "Total sum of 1000", unlocked: false },
-  { id: "sum-10000", name: "Googol Seeker", description: "Total sum of 10000", unlocked: false },
-  { id: "first-mod", name: "Modifier Rookie", description: "Use a modifier for the first time", unlocked: false },
-  { id: "mixer", name: "Mixer", description: "Collect 100+ points with 3 different colors", unlocked: false },
+/** Context passed to achievement condition functions */
+interface AchievementContext {
+  naturalRoll: number;
+  modifiedRoll: number;
+  hasModifiers: boolean;
+  stats: GameStats;
+}
+
+/** Achievement definition with condition function */
+interface AchievementDef {
+  id: string;
+  name: string;
+  description: string;
+  /** Returns true if achievement should be unlocked */
+  condition: (ctx: AchievementContext) => boolean;
+}
+
+/**
+ * Achievement definitions with their unlock conditions.
+ * Each achievement has a condition function that receives the current roll context.
+ */
+const ACHIEVEMENT_DEFS: AchievementDef[] = [
+  {
+    id: "reach-100",
+    name: "Perfect Roll",
+    description: "Roll a natural 100",
+    condition: ({ naturalRoll }) => naturalRoll === 100,
+  },
+  {
+    id: "reach-1",
+    name: "Snake Eyes",
+    description: "Roll a natural 1",
+    condition: ({ naturalRoll }) => naturalRoll === 1,
+  },
+  {
+    id: "modified-100",
+    name: "Boosted Century",
+    description: "Reach 100+ with modifiers",
+    condition: ({ modifiedRoll, hasModifiers }) => hasModifiers && modifiedRoll >= 100,
+  },
+  {
+    id: "ten-rolls",
+    name: "Getting Started",
+    description: "Roll 10 times",
+    condition: ({ stats }) => stats.totalRolls >= 10,
+  },
+  {
+    id: "fifty-rolls",
+    name: "Dedicated Roller",
+    description: "Roll 50 times",
+    condition: ({ stats }) => stats.totalRolls >= 50,
+  },
+  {
+    id: "hundred-rolls",
+    name: "Century Club",
+    description: "Roll 100 times",
+    condition: ({ stats }) => stats.totalRolls >= 100,
+  },
+  {
+    id: "sum-100",
+    name: "First Hundred",
+    description: "Total sum of 100",
+    condition: ({ stats }) => stats.totalSum >= 100,
+  },
+  {
+    id: "sum-1000",
+    name: "Thousandaire",
+    description: "Total sum of 1000",
+    condition: ({ stats }) => stats.totalSum >= 1000,
+  },
+  {
+    id: "sum-10000",
+    name: "Googol Seeker",
+    description: "Total sum of 10000",
+    condition: ({ stats }) => stats.totalSum >= 10000,
+  },
+  {
+    id: "first-mod",
+    name: "Modifier Rookie",
+    description: "Use a modifier for the first time",
+    condition: ({ hasModifiers }) => hasModifiers,
+  },
+  {
+    id: "mixer",
+    name: "Mixer",
+    description: "Collect 100+ points with 3 different colors",
+    condition: ({ stats }) => {
+      const qualifyingColors = Object.values(stats.colorTotals || {}).filter(total => total >= 100).length;
+      return qualifyingColors >= 3;
+    },
+  },
 ];
+
+/** Convert achievement definitions to initial state (all locked) */
+const DEFAULT_ACHIEVEMENTS: Achievement[] = ACHIEVEMENT_DEFS.map(def => ({
+  id: def.id,
+  name: def.name,
+  description: def.description,
+  unlocked: false,
+}));
 
 const STORAGE_KEY = "d100-game-state";
 
@@ -79,65 +166,21 @@ export const useAchievements = () => {
     );
   }, []);
 
+  /**
+   * Check all achievement conditions and unlock any that are newly satisfied.
+   * Uses data-driven approach: iterates through ACHIEVEMENT_DEFS and evaluates each condition.
+   */
   const checkAchievements = useCallback(
     (naturalRoll: number, modifiedRoll: number, hasModifiers: boolean, newStats: GameStats) => {
       const newlyUnlocked: string[] = [];
+      const ctx: AchievementContext = { naturalRoll, modifiedRoll, hasModifiers, stats: newStats };
 
-      // Natural roll achievements
-      if (naturalRoll === 100 && !achievements.find((a) => a.id === "reach-100")?.unlocked) {
-        unlockAchievement("reach-100");
-        newlyUnlocked.push("Perfect Roll");
-      }
-      if (naturalRoll === 1 && !achievements.find((a) => a.id === "reach-1")?.unlocked) {
-        unlockAchievement("reach-1");
-        newlyUnlocked.push("Snake Eyes");
-      }
-
-      // Modified roll achievements
-      if (hasModifiers && modifiedRoll >= 100 && !achievements.find((a) => a.id === "modified-100")?.unlocked) {
-        unlockAchievement("modified-100");
-        newlyUnlocked.push("Boosted Century");
-      }
-
-      // First modifier use
-      if (hasModifiers && !achievements.find((a) => a.id === "first-mod")?.unlocked) {
-        unlockAchievement("first-mod");
-        newlyUnlocked.push("Modifier Rookie");
-      }
-
-      // Check roll count achievements
-      if (newStats.totalRolls >= 10 && !achievements.find((a) => a.id === "ten-rolls")?.unlocked) {
-        unlockAchievement("ten-rolls");
-        newlyUnlocked.push("Getting Started");
-      }
-      if (newStats.totalRolls >= 50 && !achievements.find((a) => a.id === "fifty-rolls")?.unlocked) {
-        unlockAchievement("fifty-rolls");
-        newlyUnlocked.push("Dedicated Roller");
-      }
-      if (newStats.totalRolls >= 100 && !achievements.find((a) => a.id === "hundred-rolls")?.unlocked) {
-        unlockAchievement("hundred-rolls");
-        newlyUnlocked.push("Century Club");
-      }
-
-      // Check sum achievements (using total sum including modifiers)
-      if (newStats.totalSum >= 100 && !achievements.find((a) => a.id === "sum-100")?.unlocked) {
-        unlockAchievement("sum-100");
-        newlyUnlocked.push("First Hundred");
-      }
-      if (newStats.totalSum >= 1000 && !achievements.find((a) => a.id === "sum-1000")?.unlocked) {
-        unlockAchievement("sum-1000");
-        newlyUnlocked.push("Thousandaire");
-      }
-      if (newStats.totalSum >= 10000 && !achievements.find((a) => a.id === "sum-10000")?.unlocked) {
-        unlockAchievement("sum-10000");
-        newlyUnlocked.push("Googol Seeker");
-      }
-      
-      // Check mixer achievement
-      const qualifyingColors = Object.values(newStats.colorTotals || {}).filter(total => total >= 100).length;
-      if (qualifyingColors >= 3 && !achievements.find((a) => a.id === "mixer")?.unlocked) {
-        unlockAchievement("mixer");
-        newlyUnlocked.push("Mixer");
+      for (const def of ACHIEVEMENT_DEFS) {
+        const achievement = achievements.find(a => a.id === def.id);
+        if (!achievement?.unlocked && def.condition(ctx)) {
+          unlockAchievement(def.id);
+          newlyUnlocked.push(def.name);
+        }
       }
 
       return newlyUnlocked;

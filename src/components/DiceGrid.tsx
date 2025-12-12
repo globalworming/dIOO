@@ -1,5 +1,6 @@
+import { useMemo } from "react";
 import { DiceItem } from "./DiceItem";
-import { Modifier, MODIFIER_COLORS, getModifierColor } from "./ModifierPanel";
+import { Modifier, MODIFIER_COLORS, buildModifierColorMap } from "./ModifierPanel";
 
 interface DiceGridProps {
   items: boolean[];
@@ -21,11 +22,22 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
   // Get active modifier zones with colors
   const activeModifiers = modifiers.filter(m => m.active);
   const highlightedZones = new Set(activeModifiers.flatMap(m => m.zones));
+  
+  // Pre-build color map for O(1) lookups in render loop
+  const colorMap = useMemo(() => buildModifierColorMap(activeModifiers), [activeModifiers]);
 
-  // Create sorted indices - falses first, then trues
+  /**
+   * Visual sorting animation: reorder grid cells so empty cells appear first (top-left),
+   * then cells with dots appear last (bottom-right). This creates a "sweep" effect
+   * where dots visually collect at the end of the grid.
+   * 
+   * Each item gets a sortedPosition which is used as CSS `order` property.
+   * The sortedPosition also controls animation delay for staggered transitions.
+   */
   const sortedIndices = items
     .map((hasDot, originalIndex) => ({ hasDot, originalIndex }))
     .sort((a, b) => {
+      // Empty cells first, then cells with dots; preserve original order within each group
       if (a.hasDot === b.hasDot) return a.originalIndex - b.originalIndex;
       return a.hasDot ? 1 : -1;
     })
@@ -34,6 +46,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
       sortedPosition,
     }));
 
+  /** Get the sorted position for a cell at the given original grid index */
   const getSortedIndex = (originalIndex: number) => {
     return sortedIndices.find((s) => s.originalIndex === originalIndex)?.sortedPosition ?? originalIndex;
   };
@@ -124,7 +137,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
               phase={phase === "idle" ? "sorted" : phase}
               sortedIndex={getSortedIndex(index)}
               highlighted={highlightedZones.has(index)}
-              modifierColor={getModifierColor(index, activeModifiers)}
+              modifierColor={colorMap[index]}
             />
           ))}
         </div>

@@ -14,20 +14,9 @@ export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses =
   
   return (
     <div 
-      className="text-center mb-4 p-2 relative"
+      className="text-center  relative"
       aria-label={displayValue !== null ? `Result: ${displayValue}` : "Result display"}
     >
-      <div
-        className={cn(
-          "result-display text-primary text-glow transition-all duration-500",
-          phase === "random" && "opacity-30 blur-sm",
-          phase === "sorting" && "opacity-60",
-          phase === "modifying" && "opacity-80",
-          phase === "sorted" && "opacity-100"
-        )}
-      >
-        {displayValue !== null ? displayValue : "—"}
-      </div>
       <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground h-5">
         {showModified ? (
           <div className="flex items-center gap-1 animate-fade-in-up">
@@ -39,6 +28,17 @@ export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses =
         ) : (
           <span className="invisible">—</span>
         )}
+      </div>
+      <div
+        className={cn(
+          "result-display text-primary text-glow transition-all duration-500",
+          phase === "random" && "opacity-30 blur-sm",
+          phase === "sorting" && "opacity-60",
+          phase === "modifying" && "opacity-80",
+          phase === "sorted" && "opacity-100"
+        )}
+      >
+        {displayValue !== null ? displayValue : "—"}
       </div>
     </div>
   );

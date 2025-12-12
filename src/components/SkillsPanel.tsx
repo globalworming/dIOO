@@ -123,11 +123,11 @@ export const SkillsPanel = ({ skills, onToggle, disabled }: SkillsPanelProps) =>
           key={skill.id}
           variant={"link"}
           size="sm"
-          className={`w-10 h-10 p-0 transition-all duration-700 relative overflow-hidden ${
+          className={`w-10 h-10 p-0 transition-all duration-700 relative overflow-hidden bg-background ${
             skill.active 
               ? "ring-2 ring-primary" 
               : "ring-1 ring-background hover:ring-4 hover:ring-primary/20"
-          } ${skill.triggered ? "animate-ping duration-2000" : ""}`}
+          } ${skill.triggered ? "ring-8 ring-muted bg-primary" : ""}`}
           onClick={() => onToggle(skill.id)}
           disabled={disabled}
           title={skill.name}

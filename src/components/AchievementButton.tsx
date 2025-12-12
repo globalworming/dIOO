@@ -12,7 +12,7 @@ export const AchievementButton = ({ onClick, unlockedCount, totalCount }: Achiev
     <button
       onClick={onClick}
       className={cn(
-        "fixed bottom-4 right-4 z-50 p-3 rounded-lg glass",
+        "p-3 rounded-lg glass",
         "hover:bg-secondary/80 transition-colors flex items-center gap-2"
       )}
       title="View Achievements"

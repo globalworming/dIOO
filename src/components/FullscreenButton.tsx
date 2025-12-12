@@ -11,7 +11,7 @@ export const FullscreenButton = ({ isFullscreen, onToggle }: FullscreenButtonPro
     <button
       onClick={onToggle}
       className={cn(
-        "fixed bottom-4 left-4 z-50 p-3 rounded-lg glass",
+        "p-3 rounded-lg glass",
         "hover:bg-secondary/80 transition-colors"
       )}
       title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}

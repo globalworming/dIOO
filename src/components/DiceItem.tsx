@@ -28,7 +28,6 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
         <div
           className={cn(
             "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-background transition-scale duration-500",
-            (phase === "sorted" || phase === "modifying" || phase === "skilling"),
             highlighted && hasDot && "[scale:1.7]",
             !modifierColor && "bg-primary"
           )}
