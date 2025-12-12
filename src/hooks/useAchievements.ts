@@ -1,114 +1,14 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { ACHIEVEMENT_DEFS, AchievementContext, GameStats, getAvailableAchievements, AchievementDef } from "@/data/achievements";
+
+export type { GameStats };
 
 export interface Achievement {
   id: string;
   name: string;
   description: string;
   unlocked: boolean;
-  requiresNatural?: boolean; // If true, only natural rolls count
 }
-
-export interface GameStats {
-  highestRoll: number;
-  totalSum: number;
-  totalNaturalSum: number;
-  totalRolls: number;
-  totalModifiedRolls: number;
-  colorTotals: Record<string, number>;
-}
-
-/** Context passed to achievement condition functions */
-interface AchievementContext {
-  naturalRoll: number;
-  modifiedRoll: number;
-  hasModifiers: boolean;
-  stats: GameStats;
-}
-
-/** Achievement definition with condition function */
-interface AchievementDef {
-  id: string;
-  name: string;
-  description: string;
-  /** Returns true if achievement should be unlocked */
-  condition: (ctx: AchievementContext) => boolean;
-}
-
-/**
- * Achievement definitions with their unlock conditions.
- * Each achievement has a condition function that receives the current roll context.
- */
-const ACHIEVEMENT_DEFS: AchievementDef[] = [
-  {
-    id: "reach-100",
-    name: "Perfect Roll",
-    description: "Roll a natural 100",
-    condition: ({ naturalRoll }) => naturalRoll === 100,
-  },
-  {
-    id: "reach-1",
-    name: "Snake Eyes",
-    description: "Roll a natural 1",
-    condition: ({ naturalRoll }) => naturalRoll === 1,
-  },
-  {
-    id: "modified-100",
-    name: "Boosted Century",
-    description: "Reach 100+ with modifiers",
-    condition: ({ modifiedRoll, hasModifiers }) => hasModifiers && modifiedRoll >= 100,
-  },
-  {
-    id: "ten-rolls",
-    name: "Getting Started",
-    description: "Roll 10 times",
-    condition: ({ stats }) => stats.totalRolls >= 10,
-  },
-  {
-    id: "fifty-rolls",
-    name: "Dedicated Roller",
-    description: "Roll 50 times",
-    condition: ({ stats }) => stats.totalRolls >= 50,
-  },
-  {
-    id: "hundred-rolls",
-    name: "Century Club",
-    description: "Roll 100 times",
-    condition: ({ stats }) => stats.totalRolls >= 100,
-  },
-  {
-    id: "sum-100",
-    name: "First Hundred",
-    description: "Total sum of 100",
-    condition: ({ stats }) => stats.totalSum >= 100,
-  },
-  {
-    id: "sum-1000",
-    name: "Thousandaire",
-    description: "Total sum of 1000",
-    condition: ({ stats }) => stats.totalSum >= 1000,
-  },
-  {
-    id: "sum-10000",
-    name: "Googol Seeker",
-    description: "Total sum of 10000",
-    condition: ({ stats }) => stats.totalSum >= 10000,
-  },
-  {
-    id: "first-mod",
-    name: "Modifier Rookie",
-    description: "Use a modifier for the first time",
-    condition: ({ hasModifiers }) => hasModifiers,
-  },
-  {
-    id: "mixer",
-    name: "Mixer",
-    description: "Collect 100+ points with 3 different colors",
-    condition: ({ stats }) => {
-      const qualifyingColors = Object.values(stats.colorTotals || {}).filter(total => total >= 100).length;
-      return qualifyingColors >= 3;
-    },
-  },
-];
 
 /** Convert achievement definitions to initial state (all locked) */
 const DEFAULT_ACHIEVEMENTS: Achievement[] = ACHIEVEMENT_DEFS.map(def => ({
@@ -166,18 +66,40 @@ export const useAchievements = () => {
     );
   }, []);
 
+  // Build set of unlocked IDs for tree traversal
+  const unlockedIds = useMemo(
+    () => new Set(achievements.filter(a => a.unlocked).map(a => a.id)),
+    [achievements]
+  );
+
+  // Get unlocked and available achievements from the tree
+  const { unlocked: unlockedDefs, available: availableDefs } = useMemo(
+    () => getAvailableAchievements(unlockedIds),
+    [unlockedIds]
+  );
+
   /**
-   * Check all achievement conditions and unlock any that are newly satisfied.
-   * Uses data-driven approach: iterates through ACHIEVEMENT_DEFS and evaluates each condition.
+   * Check only available achievements (those whose parent is unlocked).
+   * Uses tree-based approach: only checks achievements that are reachable.
    */
   const checkAchievements = useCallback(
     (naturalRoll: number, modifiedRoll: number, hasModifiers: boolean, newStats: GameStats) => {
       const newlyUnlocked: string[] = [];
       const ctx: AchievementContext = { naturalRoll, modifiedRoll, hasModifiers, stats: newStats };
 
-      for (const def of ACHIEVEMENT_DEFS) {
-        const achievement = achievements.find(a => a.id === def.id);
-        if (!achievement?.unlocked && def.condition(ctx)) {
+      // Check start achievement first (always available)
+      const startAchievement = achievements.find(a => a.id === "start");
+      if (!startAchievement?.unlocked) {
+        const startDef = ACHIEVEMENT_DEFS.find(d => d.id === "start");
+        if (startDef?.condition(ctx)) {
+          unlockAchievement("start");
+          newlyUnlocked.push(startDef.name);
+        }
+      }
+
+      // Check available achievements (those whose parent is unlocked)
+      for (const def of availableDefs) {
+        if (def.condition(ctx)) {
           unlockAchievement(def.id);
           newlyUnlocked.push(def.name);
         }
@@ -185,7 +107,7 @@ export const useAchievements = () => {
 
       return newlyUnlocked;
     },
-    [achievements, unlockAchievement]
+    [achievements, availableDefs, unlockAchievement]
   );
 
   const recordRoll = useCallback(
@@ -215,5 +137,16 @@ export const useAchievements = () => {
     setStats(DEFAULT_STATS);
   }, []);
 
-  return { achievements, stats, recordRoll, resetGame };
+  return { 
+    achievements, 
+    stats, 
+    recordRoll, 
+    resetGame,
+    /** Achievements that are unlocked (walked from start) */
+    unlockedDefs,
+    /** Achievements available to unlock next (parent unlocked, not yet achieved) */
+    availableDefs,
+    /** Total number of achievements in the game */
+    totalAchievementCount: ACHIEVEMENT_DEFS.length,
+  };
 };

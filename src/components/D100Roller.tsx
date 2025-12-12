@@ -15,7 +15,14 @@ export const D100Roller = () => {
   const [modifiers, setModifiers] = useState<Modifier[]>(DEFAULT_MODIFIERS);
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   
-  const { achievements, stats, recordRoll, resetGame } = useAchievements();
+  const { stats, recordRoll, resetGame, unlockedDefs, availableDefs, totalAchievementCount } = useAchievements();
+
+  // Reset all progress including modifiers and skills
+  const handleResetGame = useCallback(() => {
+    resetGame();
+    setModifiers(DEFAULT_MODIFIERS.map(m => ({ ...m, active: false })));
+    setSkills(DEFAULT_SKILLS.map(s => ({ ...s, active: false })));
+  }, [resetGame]);
 
   // Handle skill trigger animations
   const handleSkillsTriggered = useCallback((triggeredIds: Set<string>) => {
@@ -92,9 +99,11 @@ export const D100Roller = () => {
       <AchievementPanel
         isOpen={achievementPanelOpen}
         onClose={() => setAchievementPanelOpen(false)}
-        achievements={achievements}
         stats={stats}
-        onReset={resetGame}
+        onReset={handleResetGame}
+        unlockedDefs={unlockedDefs}
+        availableDefs={availableDefs}
+        totalCount={totalAchievementCount}
       />
 
       <div className="mx-auto max-w-[min(100vw,calc(100vh-25rem))] max-h-[calc(100vh-25rem)]">
@@ -113,16 +122,19 @@ export const D100Roller = () => {
           modifiedResult={modifiedResult}
         />
         
-        {/* Modifier panel below grid */}
+        {/* Modifier panel below grid - unlocked after ten-rolls */}
         <div className="flex flex-col justify-center mt-4 gap-4">
-          <div className="flex justify-center">
-            <ModifierPanel 
-              modifiers={modifiers} 
-              onToggle={toggleModifier}
-              disabled={isRolling}
-            />
-          </div>
-          <div hidden={false}>
+          {unlockedDefs.some(d => d.id === "ten-rolls") && (
+            <div className="flex justify-center">
+              <ModifierPanel 
+                modifiers={modifiers} 
+                onToggle={toggleModifier}
+                disabled={isRolling}
+              />
+            </div>
+          )}
+          {/* Skills panel - unlocked after fifty-rolls */}
+          {unlockedDefs.some(d => d.id === "fifty-rolls") && (
             <div className="flex justify-center">
               <SkillsPanel 
                 skills={skills} 
@@ -130,14 +142,14 @@ export const D100Roller = () => {
                 disabled={isRolling}
               />
             </div>
-          </div>
+          )}
           {/* Controls row: fullscreen and achievements */}
           <div className="flex justify-center gap-2">
             <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
             <AchievementButton
               onClick={() => setAchievementPanelOpen(true)}
-              unlockedCount={achievements.filter((a) => a.unlocked).length}
-              totalCount={achievements.length}
+              unlockedCount={unlockedDefs.length}
+              totalCount={totalAchievementCount}
             />
           </div>
         </div>
