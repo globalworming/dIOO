@@ -9,9 +9,11 @@ interface DiceGridProps {
   result?: number | null;
   modifiers?: Modifier[];
   modifiedResult?: number | null;
+  /** Indices consumed by skill pattern matching (in sorted grid order) */
+  consumedIndices?: Set<number>;
 }
 
-export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifiedResult }: DiceGridProps) => {
+export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifiedResult, consumedIndices = new Set() }: DiceGridProps) => {
   const displayResult = modifiedResult ?? result;
   // Calculate intensity based on result (0-1 scale)
   const intensity = displayResult ? displayResult / 100 : 0;
@@ -138,6 +140,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
               sortedIndex={getSortedIndex(index)}
               highlighted={highlightedZones.has(index)}
               modifierColor={colorMap[index]}
+              consumed={consumedIndices.has(getSortedIndex(index))}
             />
           ))}
         </div>

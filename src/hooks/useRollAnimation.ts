@@ -47,7 +47,11 @@ interface UseRollAnimationReturn {
   result: number | null;
   modifiedResult: number | null;
   modifierBonuses: ModifierBonus[];
+  /** Indices consumed by skill pattern matching (in sorted grid order) */
+  consumedIndices: Set<number>;
   roll: () => void;
+  /** Debug: trigger a roll with a predetermined natural result */
+  debugRoll: (naturalRoll: number) => void;
   isRolling: boolean;
 }
 
@@ -74,6 +78,7 @@ export const useRollAnimation = ({
   const [result, setResult] = useState<number | null>(0);
   const [modifiedResult, setModifiedResult] = useState<number | null>(null);
   const [modifierBonuses, setModifierBonuses] = useState<ModifierBonus[]>([]);
+  const [consumedIndices, setConsumedIndices] = useState<Set<number>>(new Set());
   
   // Track active intervals/timeouts for cleanup
   const animationRef = useRef<{ interval?: NodeJS.Timeout; timeouts: NodeJS.Timeout[] }>({
@@ -82,7 +87,7 @@ export const useRollAnimation = ({
 
   const hasActiveModifiers = modifiers.some(m => m.active);
 
-  const roll = useCallback(() => {
+  const executeRoll = useCallback((predeterminedResult?: number) => {
     if (phase !== "idle" && phase !== "sorted") return;
 
     // Clear any pending animations
@@ -92,10 +97,11 @@ export const useRollAnimation = ({
     animationRef.current.timeouts.forEach(clearTimeout);
     animationRef.current.timeouts = [];
 
-    const rolledResult = rollD100();
+    const rolledResult = predeterminedResult ?? rollD100();
     setResult(null);
     setModifiedResult(null);
     setModifierBonuses([]);
+    setConsumedIndices(new Set());
     setPhase("random");
 
     // Phase 1: Converging animation
@@ -139,10 +145,12 @@ export const useRollAnimation = ({
                 const skillTimeout = setTimeout(() => {
                   const activeMods = modifiers.filter(m => m.active);
                   const sortedColors = buildSortedColors(finalItems, activeMods);
-                  const { skillBonuses, totalSkillBonus, triggeredSkills } = calculateSkillBonuses(
+                  const { skillBonuses, totalSkillBonus, triggeredSkills, consumedIndices: consumed } = calculateSkillBonuses(
                     sortedColors,
                     skills
                   );
+
+                  setConsumedIndices(consumed);
 
                   if (triggeredSkills.size > 0) {
                     onSkillsTriggered?.(triggeredSkills);
@@ -175,6 +183,9 @@ export const useRollAnimation = ({
     }, 140);
   }, [phase, hasActiveModifiers, modifiers, skills, recordRoll, onSkillsTriggered]);
 
+  const roll = useCallback(() => executeRoll(), [executeRoll]);
+  const debugRoll = useCallback((naturalRoll: number) => executeRoll(naturalRoll), [executeRoll]);
+
   const isRolling = phase === "random" || phase === "sorting" || phase === "modifying";
 
   return {
@@ -183,7 +194,9 @@ export const useRollAnimation = ({
     result,
     modifiedResult,
     modifierBonuses,
+    consumedIndices,
     roll,
+    debugRoll,
     isRolling,
   };
 };

@@ -15,7 +15,7 @@ export const D100Roller = () => {
   const [modifiers, setModifiers] = useState<Modifier[]>(DEFAULT_MODIFIERS);
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   
-  const { stats, recordRoll, resetGame, unlockedDefs, availableDefs, totalAchievementCount } = useAchievements();
+  const { stats, recordRoll, resetGame, setTotalRolls, unlockedDefs, availableDefs, totalAchievementCount } = useAchievements();
 
   // Reset all progress including modifiers and skills
   const handleResetGame = useCallback(() => {
@@ -41,7 +41,9 @@ export const D100Roller = () => {
     result,
     modifiedResult,
     modifierBonuses,
+    consumedIndices,
     roll,
+    debugRoll,
     isRolling,
   } = useRollAnimation({
     modifiers,
@@ -104,9 +106,11 @@ export const D100Roller = () => {
         unlockedDefs={unlockedDefs}
         availableDefs={availableDefs}
         totalCount={totalAchievementCount}
+        onDebugRoll={debugRoll}
+        onSetTotalRolls={setTotalRolls}
       />
 
-      <div className="mx-auto max-w-[min(100vw,calc(100vh-25rem))] max-h-[calc(100vh-25rem)]">
+      <div className="mx-auto max-w-[min(100vw,calc(100vh-25rem))] max-h-[calc(100vh-25rem)] select-none">
         <ResultDisplay 
           result={result} 
           phase={phase} 
@@ -120,6 +124,7 @@ export const D100Roller = () => {
           result={result}
           modifiers={modifiers}
           modifiedResult={modifiedResult}
+          consumedIndices={consumedIndices}
         />
         
         {/* Modifier panel below grid - unlocked after ten-rolls */}

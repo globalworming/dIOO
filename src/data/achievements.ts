@@ -5,6 +5,10 @@ export interface GameStats {
   totalRolls: number;
   totalModifiedRolls: number;
   colorTotals: Record<string, number>;
+  /** Track which natural numbers (1-100) have been rolled */
+  rolledNumbers: Set<number>;
+  /** Track last 3 natural rolls for consecutive roll achievements */
+  recentRolls: number[];
 }
 
 /** Context passed to achievement condition functions */
@@ -108,13 +112,56 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "Snake Eyes",
     description: "Roll a natural 1",
     condition: ({ naturalRoll }) => naturalRoll === 1,
-    next: ["reach-100"],
+    next: ["reach-100", "reach-2"],
   },
+  {
+    id: "reach-2",
+    name: "Open your third eye",
+    description: "Roll a natural 2",
+    condition: ({ naturalRoll }) => naturalRoll === 2,
+    next: ["reach-3"],
+  },
+  {
+    id: "reach-3",
+    name: "Now see",
+    description: "Roll a natural 3",
+    condition: ({ naturalRoll }) => naturalRoll === 3,
+    next: Array.from({ length: 100 }, (_, i) => `reach-${i + 1}`).slice(3, -1),
+  },
+  // Generate reach-4 through reach-99
+  ...Array.from({ length: 100 }, (_, i) => ({
+    id: `reach-${i + 1}`,
+    name: `Roll ${i + 1}`,
+    description: `Roll a natural ${i + 1}`,
+    condition: ({ naturalRoll }: AchievementContext) => naturalRoll === i + 1,
+    next: ["reach-all"],
+  })).slice(3, -1),
   {
     id: "reach-100",
     name: "Perfect Roll",
     description: "Roll a natural 100",
     condition: ({ naturalRoll }) => naturalRoll === 100,
+    next: ["reach-all", "one-in-a-million"],
+  },
+  {
+    id: "reach-all",
+    name: "Master of the Dice",
+    description: "Rolled all numbers 1-100",
+    condition: ({ stats }) => stats.rolledNumbers.size >= 100,
+  },
+  {
+    id: "one-in-a-million",
+    name: "One in a Million",
+    description: "Or something close, pretty unlikely to roll two consecutive 100s",
+    condition: ({ stats }) => stats.recentRolls.length >= 2 && stats.recentRolls[0] === 100 && stats.recentRolls[1] === 100,
+    next: ["one-in-a-billion"]
+  },
+  {
+    id: "one-in-a-billion",
+    name: "One in a Billion",
+    description: "Or something close, pretty unlikely to roll three consecutive 100s",
+    condition: ({ stats }) => stats.recentRolls.length >= 3 && stats.recentRolls.every(r => r === 100),
+    next: []
   },
 ];
 

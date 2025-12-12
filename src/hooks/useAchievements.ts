@@ -32,6 +32,8 @@ const DEFAULT_STATS: GameStats = {
   totalRolls: 0,
   totalModifiedRolls: 0,
   colorTotals: {},
+  rolledNumbers: new Set<number>(),
+  recentRolls: [],
 };
 
 export const useAchievements = () => {
@@ -50,14 +52,22 @@ export const useAchievements = () => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed: StoredState = JSON.parse(stored);
-      return { ...DEFAULT_STATS, ...parsed.stats };
+      // Restore rolledNumbers as a Set (JSON serializes it as array)
+      const rolledNumbers = new Set<number>(parsed.stats.rolledNumbers || []);
+      const recentRolls = parsed.stats.recentRolls || [];
+      return { ...DEFAULT_STATS, ...parsed.stats, rolledNumbers, recentRolls };
     }
     return DEFAULT_STATS;
   });
 
   // Save to localStorage whenever state changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ achievements, stats }));
+    // Convert Set to array for JSON serialization
+    const statsForStorage = {
+      ...stats,
+      rolledNumbers: Array.from(stats.rolledNumbers),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ achievements, stats: statsForStorage }));
   }, [achievements, stats]);
 
   const unlockAchievement = useCallback((id: string) => {
@@ -118,6 +128,13 @@ export const useAchievements = () => {
         newColorTotals[color] = (newColorTotals[color] || 0) + bonus;
       });
       
+      // Track rolled numbers
+      const newRolledNumbers = new Set(stats.rolledNumbers);
+      newRolledNumbers.add(naturalRoll);
+
+      // Track recent rolls (keep last 3)
+      const newRecentRolls = [naturalRoll, ...stats.recentRolls].slice(0, 3);
+
       const newStats: GameStats = {
         highestRoll: Math.max(stats.highestRoll, modifiedRoll),
         totalSum: stats.totalSum + modifiedRoll,
@@ -125,6 +142,8 @@ export const useAchievements = () => {
         totalRolls: stats.totalRolls + 1,
         totalModifiedRolls: hasModifiers ? stats.totalModifiedRolls + 1 : stats.totalModifiedRolls,
         colorTotals: newColorTotals,
+        rolledNumbers: newRolledNumbers,
+        recentRolls: newRecentRolls,
       };
       setStats(newStats);
       return checkAchievements(naturalRoll, modifiedRoll, hasModifiers, newStats);
@@ -137,11 +156,17 @@ export const useAchievements = () => {
     setStats(DEFAULT_STATS);
   }, []);
 
+  const setTotalRolls = useCallback((value: number) => {
+    setStats(prev => ({ ...prev, totalRolls: value }));
+  }, []);
+
   return { 
     achievements, 
     stats, 
     recordRoll, 
     resetGame,
+    /** Debug: set total rolls directly */
+    setTotalRolls,
     /** Achievements that are unlocked (walked from start) */
     unlockedDefs,
     /** Achievements available to unlock next (parent unlocked, not yet achieved) */

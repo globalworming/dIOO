@@ -73,7 +73,7 @@ export const calculateModifierBonuses = (
 export const calculateSkillBonuses = (
   sortedColors: (string | undefined)[],
   skills: Skill[]
-): { skillBonuses: ModifierBonus[], totalSkillBonus: number, triggeredSkills: Set<string> } => {
+): { skillBonuses: ModifierBonus[], totalSkillBonus: number, triggeredSkills: Set<string>, consumedIndices: Set<number> } => {
   const activeSkills = skills.filter(s => s.active);
   const consumedIndices = new Set<number>();
   const skillBonuses: ModifierBonus[] = [];
@@ -132,7 +132,7 @@ export const calculateSkillBonuses = (
     }
   }
 
-  return { skillBonuses, totalSkillBonus, triggeredSkills };
+  return { skillBonuses, totalSkillBonus, triggeredSkills, consumedIndices };
 };
 
 /**
