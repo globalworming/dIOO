@@ -34,7 +34,13 @@ const DEFAULT_STATS: GameStats = {
   colorTotals: {},
   rolledNumbers: new Set<number>(),
   recentRolls: [],
+  inventory: {
+    colors: {},
+    rolls: 0,
+  },
 };
+
+const INVENTORY_CAP = 1000;
 
 export const useAchievements = () => {
   const [achievements, setAchievements] = useState<Achievement[]>(() => {
@@ -55,7 +61,8 @@ export const useAchievements = () => {
       // Restore rolledNumbers as a Set (JSON serializes it as array)
       const rolledNumbers = new Set<number>(parsed.stats.rolledNumbers || []);
       const recentRolls = parsed.stats.recentRolls || [];
-      return { ...DEFAULT_STATS, ...parsed.stats, rolledNumbers, recentRolls };
+      const inventory = parsed.stats.inventory || { colors: {}, rolls: 0 };
+      return { ...DEFAULT_STATS, ...parsed.stats, rolledNumbers, recentRolls, inventory };
     }
     return DEFAULT_STATS;
   });
@@ -135,6 +142,23 @@ export const useAchievements = () => {
       // Track recent rolls (keep last 3)
       const newRecentRolls = [naturalRoll, ...stats.recentRolls].slice(0, 3);
 
+      // Update inventory (capped at INVENTORY_CAP) - only after ten-rolls unlocked
+      const tenRollsUnlocked = achievements.find(a => a.id === "ten-rolls")?.unlocked ?? false;
+      const newInventory = { ...stats.inventory };
+      if (tenRollsUnlocked) {
+        // Add color bonuses to inventory
+        const newInventoryColors = { ...newInventory.colors };
+        bonuses.forEach(({ color, bonus }) => {
+          newInventoryColors[color] = Math.min(
+            INVENTORY_CAP,
+            (newInventoryColors[color] || 0) + bonus
+          );
+        });
+        newInventory.colors = newInventoryColors;
+        // Add natural roll value to rolls inventory
+        newInventory.rolls = Math.min(INVENTORY_CAP, newInventory.rolls + naturalRoll);
+      }
+
       const newStats: GameStats = {
         highestRoll: Math.max(stats.highestRoll, modifiedRoll),
         totalSum: stats.totalSum + modifiedRoll,
@@ -144,11 +168,12 @@ export const useAchievements = () => {
         colorTotals: newColorTotals,
         rolledNumbers: newRolledNumbers,
         recentRolls: newRecentRolls,
+        inventory: newInventory,
       };
       setStats(newStats);
       return checkAchievements(naturalRoll, modifiedRoll, hasModifiers, newStats);
     },
-    [stats, checkAchievements]
+    [stats, achievements, checkAchievements]
   );
 
   const resetGame = useCallback(() => {

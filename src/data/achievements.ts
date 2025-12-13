@@ -9,6 +9,13 @@ export interface GameStats {
   rolledNumbers: Set<number>;
   /** Track last 3 natural rolls for consecutive roll achievements */
   recentRolls: number[];
+  /** Accumulated resources (capped at 1000 each) */
+  inventory: {
+    /** Accumulated color points by color */
+    colors: Record<string, number>;
+    /** Accumulated normal roll points */
+    rolls: number;
+  };
 }
 
 /** Context passed to achievement condition functions */

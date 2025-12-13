@@ -116,6 +116,7 @@ export const D100Roller = () => {
           phase={phase} 
           modifiedResult={modifiedResult}
           modifierBonuses={modifierBonuses}
+          inventory={stats.inventory}
         />
         <DiceGrid 
           items={items} 

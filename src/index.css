@@ -72,8 +72,8 @@
 @layer utilities {
   .text-glow {
     text-shadow: 
-      0 0 10px hsl(var(--primary) / 0.5),
-      0 0 30px hsl(var(--primary) / 0.3);
+      0 0 10px hsl(var(--background) / 0.8),
+      0 0 30px hsl(var(--background) / 0.5);
   }
 
   .glass {
