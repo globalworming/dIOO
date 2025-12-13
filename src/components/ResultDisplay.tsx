@@ -48,7 +48,7 @@ export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses =
                 style={{ 
                   height: `${(amount / INVENTORY_CAP) * 100}%`,
                   backgroundColor: color,
-                  boxShadow: 'inset 0 -6px 10px rgba(0, 0, 0, 1), inset -6 6px 10px rgba(255, 255, 255, 0.3)',
+                  boxShadow: 'inset 0 -6px 10px rgba(0, 0, 0, 1), inset -6px 6px 10px rgba(255, 255, 255, 0.5)',
                 }}
               />
             </div>
