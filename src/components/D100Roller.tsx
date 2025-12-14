@@ -19,7 +19,7 @@ export const D100Roller = () => {
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementDef | null>(null);
   
-  const { stats, recordRoll, resetGame, setTotalRolls, unlockAchievement, unlockedDefs, availableDefs, totalAchievementCount } = useAchievements();
+  const { stats, recordRoll, resetGame, setTotalRolls, unlockAchievement, unlockedDefs, unlockedDefsSorted, availableDefs, totalAchievementCount, latestUnlockedDef } = useAchievements();
 
   // Reset all progress including modifiers and skills
   const handleResetGame = useCallback(() => {
@@ -107,7 +107,7 @@ export const D100Roller = () => {
         onClose={() => setAchievementPanelOpen(false)}
         stats={stats}
         onReset={handleResetGame}
-        unlockedDefs={unlockedDefs}
+        unlockedDefs={unlockedDefsSorted}
         availableDefs={availableDefs}
         totalCount={totalAchievementCount}
         onDebugRoll={debugRoll}
@@ -172,10 +172,10 @@ export const D100Roller = () => {
                   setAchievementPanelOpen(true);
                   setTimeout(() => unlockAchievement("open-achievements"), 500);
                 }}
-                onInfoClick={() => setSelectedAchievement(unlockedDefs[unlockedDefs.length - 1] ?? null)}
+                onInfoClick={() => setSelectedAchievement(latestUnlockedDef)}
                 unlockedCount={unlockedDefs.length}
                 totalCount={totalAchievementCount}
-                latestUnlocked={unlockedDefs[unlockedDefs.length - 1]}
+                latestUnlocked={latestUnlockedDef ?? undefined}
               />
               {!unlockedDefs.some(d => d.id === "open-achievements") && (
                 <Hint>click for achievements and statistics</Hint>

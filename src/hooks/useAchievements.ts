@@ -9,6 +9,8 @@ export interface Achievement {
   name: string;
   description: string;
   unlocked: boolean;
+  /** Timestamp when unlocked, used for sorting */
+  unlockedAt?: number;
 }
 
 /** Convert achievement definitions to initial state (all locked) */
@@ -17,6 +19,7 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = ACHIEVEMENT_DEFS.map(def => ({
   name: def.name,
   description: def.description,
   unlocked: false,
+  unlockedAt: undefined,
 }));
 
 const STORAGE_KEY = "d100-game-state";
@@ -68,6 +71,9 @@ export const useAchievements = () => {
     return DEFAULT_STATS;
   });
 
+  // Track the most recently unlocked achievement ID
+  const [latestUnlockedId, setLatestUnlockedId] = useState<string | null>(null);
+
   // Save to localStorage whenever state changes
   useEffect(() => {
     // Convert Set to array for JSON serialization
@@ -82,8 +88,9 @@ export const useAchievements = () => {
     const achievement = achievements.find(a => a.id === id);
     if (achievement && !achievement.unlocked) {
       setAchievements((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, unlocked: true } : a))
+        prev.map((a) => (a.id === id ? { ...a, unlocked: true, unlockedAt: Date.now() } : a))
       );
+      setLatestUnlockedId(id);
       toast.success(`Achievement Unlocked: ${achievement.name}!`, { duration: 3000 });
     }
   }, [achievements]);
@@ -98,6 +105,23 @@ export const useAchievements = () => {
   const { unlocked: unlockedDefs, available: availableDefs } = useMemo(
     () => getAvailableAchievements(unlockedIds),
     [unlockedIds]
+  );
+
+  // Sort unlocked achievements by unlock time (most recent first)
+  const unlockedDefsSorted = useMemo(() => {
+    const unlockedAchievements = achievements.filter(a => a.unlocked);
+    // Sort by unlockedAt descending (most recent first), fallback to 0 for old data
+    unlockedAchievements.sort((a, b) => (b.unlockedAt ?? 0) - (a.unlockedAt ?? 0));
+    // Map to definitions
+    return unlockedAchievements
+      .map(a => ACHIEVEMENT_DEFS.find(d => d.id === a.id))
+      .filter((d): d is AchievementDef => d !== undefined);
+  }, [achievements]);
+
+  // Get the latest unlocked achievement definition
+  const latestUnlockedDef = useMemo(
+    () => latestUnlockedId ? ACHIEVEMENT_DEFS.find(d => d.id === latestUnlockedId) ?? null : null,
+    [latestUnlockedId]
   );
 
   /**
@@ -147,10 +171,8 @@ export const useAchievements = () => {
       // Track recent rolls (keep last 3)
       const newRecentRolls = [naturalRoll, ...stats.recentRolls].slice(0, 3);
 
-      // Update inventory (capped at INVENTORY_CAP) - only after ten-rolls unlocked
-      const tenRollsUnlocked = achievements.find(a => a.id === "ten-rolls")?.unlocked ?? false;
       const newInventory = { ...stats.inventory };
-      if (tenRollsUnlocked) {
+      if (achievements.find(a => a.id === "first-mod")?.unlocked ?? false) {
         // Add color bonuses to inventory
         const newInventoryColors = { ...newInventory.colors };
         bonuses.forEach(({ color, bonus }) => {
@@ -212,9 +234,13 @@ export const useAchievements = () => {
     unlockAchievement,
     /** Achievements that are unlocked (walked from start) */
     unlockedDefs,
+    /** Unlocked achievements sorted by unlock time (most recent first) */
+    unlockedDefsSorted,
     /** Achievements available to unlock next (parent unlocked, not yet achieved) */
     availableDefs,
     /** Total number of achievements in the game */
     totalAchievementCount: ACHIEVEMENT_DEFS.length,
+    /** The most recently unlocked achievement */
+    latestUnlockedDef,
   };
 };
