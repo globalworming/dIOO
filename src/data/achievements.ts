@@ -35,16 +35,44 @@ export interface AchievementDef {
   condition: (ctx: AchievementContext) => boolean;
   /** IDs of achievements that become available after this one is unlocked */
   next?: string[];
+  /** optional method for manually unlocking this achievement */
+  unlock?: (ctx: AchievementContext) => void;
 }
 
 /** The starting achievement - unlocked by default */
-export const START_ACHIEVEMENT_ID = "start";
+export const START_ACHIEVEMENT_ID = "init";
 
 /**
  * Achievement definitions with their unlock conditions.
- * Forms a tree via `next` relations. Start from "start" which is unlocked by default.
+ * Forms a tree via `next` relations. 
  */
 export const ACHIEVEMENT_DEFS: AchievementDef[] = [
+
+  {
+    id: "init",
+    name: "Participation Trophy",
+    description: "You showed up at least. I bet the devekopers are very appreciative of that",
+    condition: () => true,
+    next: ["start", "open-achievements"]
+  },
+  {
+    id: "open-achievements",
+    name: "There is potential in this one",
+    description: "Open the achievements panel",
+    condition: () => false,
+    next: ["first-unlock"]
+  },
+  {
+    id: "first-unlock",
+    name: "Ugh, you gave it free will?",
+    description: "Unlock me. Or don't.",
+    condition: () => false,
+    next: [],
+    unlock: (ctx) => {
+      // This achievement has no further requirements for unlocking manually
+      return null
+    }
+  },
   {
     id: "start",
     name: "First Roll",

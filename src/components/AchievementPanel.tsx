@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Trophy, X, RotateCcw, Lock, Check } from "lucide-react";
+import { Trophy, X, RotateCcw, Lock, Check, Sparkles } from "lucide-react";
 import type { GameStats } from "@/hooks/useAchievements";
 import type { AchievementDef } from "@/data/achievements";
+import { AchievementModal } from "./AchievementModal";
+import { cn } from "@/lib/utils";
 
 interface AchievementPanelProps {
   isOpen: boolean;
@@ -18,6 +20,8 @@ interface AchievementPanelProps {
   onDebugRoll?: (naturalRoll: number) => void;
   /** Debug: set total rolls stat directly */
   onSetTotalRolls?: (value: number) => void;
+  /** Manually unlock an achievement */
+  onUnlockAchievement?: (id: string) => void;
 }
 
 export const AchievementPanel = ({
@@ -30,9 +34,11 @@ export const AchievementPanel = ({
   totalCount,
   onDebugRoll,
   onSetTotalRolls,
+  onUnlockAchievement,
 }: AchievementPanelProps) => {
   const [debugClicks, setDebugClicks] = useState(0);
   const showDebug = debugClicks >= 5;
+  const [selectedAchievement, setSelectedAchievement] = useState<{ def: AchievementDef; unlocked: boolean } | null>(null);
 
   return (
     <>
@@ -124,18 +130,25 @@ export const AchievementPanel = ({
                 <div className="text-xs text-muted-foreground mb-2">Available to unlock</div>
                 <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
                   {availableDefs.map((def) => (
-                    <div
+                    <button
                       key={def.id}
-                      className="flex items-center gap-3 px-4 py-2 rounded-lg border bg-secondary/50 border-primary/30"
+                      onClick={() => setSelectedAchievement({ def, unlocked: false })}
+                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg border hover:bg-secondary/70 transition-colors text-left`}
                     >
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-muted shrink-0">
-                        <Lock className="w-4 h-4 text-muted-foreground" />
+                      <div className={cn(
+                        `w-8 h-8 rounded-full flex items-center justify-center shrink-0`,
+                        def.unlock ? 'ring-1 ring-amber-500' : '')}>
+                        {def.unlock ? (
+                          <Sparkles className="w-4 h-4 text-amber-500" />
+                        ) : (
+                          <Lock className="w-4 h-4 text-muted-foreground" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-base font-medium truncate">{def.name}</div>
                         <div className="text-sm text-muted-foreground truncate">{def.description}</div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -147,9 +160,10 @@ export const AchievementPanel = ({
                 <div className="text-xs text-muted-foreground mb-2">Unlocked</div>
                 <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
                   {unlockedDefs.map((def) => (
-                    <div
+                    <button
                       key={def.id}
-                      className="flex items-center gap-3 px-4 py-2 rounded-lg border bg-primary/10 border-primary/30"
+                      onClick={() => setSelectedAchievement({ def, unlocked: true })}
+                      className="w-full flex items-center gap-3 px-4 py-2 rounded-lg border bg-primary/10 border-primary/30 hover:bg-primary/20 transition-colors text-left"
                     >
                       <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground shrink-0">
                         <Check className="w-4 h-4" />
@@ -158,7 +172,7 @@ export const AchievementPanel = ({
                         <div className="text-base font-medium truncate">{def.name}</div>
                         <div className="text-sm text-muted-foreground truncate">{def.description}</div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -197,6 +211,14 @@ export const AchievementPanel = ({
           </button>
         </div>
       </div>
+
+      {/* Achievement Detail Modal */}
+      <AchievementModal
+        achievement={selectedAchievement?.def ?? null}
+        isUnlocked={selectedAchievement?.unlocked ?? false}
+        onClose={() => setSelectedAchievement(null)}
+        onUnlock={onUnlockAchievement}
+      />
     </>
   );
 };

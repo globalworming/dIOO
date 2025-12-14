@@ -4,18 +4,21 @@ import { ResultDisplay } from "./ResultDisplay";
 import { FullscreenButton } from "./FullscreenButton";
 import { AchievementButton } from "./AchievementButton";
 import { AchievementPanel } from "./AchievementPanel";
+import { AchievementModal } from "./AchievementModal";
 import { ModifierPanel, DEFAULT_MODIFIERS, Modifier } from "./ModifierPanel";
 import { SkillsPanel, DEFAULT_SKILLS, Skill } from "./SkillsPanel";
 import { useAchievements } from "@/hooks/useAchievements";
 import { useRollAnimation } from "@/hooks/useRollAnimation";
+import type { AchievementDef } from "@/data/achievements";
 
 export const D100Roller = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [achievementPanelOpen, setAchievementPanelOpen] = useState(false);
   const [modifiers, setModifiers] = useState<Modifier[]>(DEFAULT_MODIFIERS);
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
+  const [selectedAchievement, setSelectedAchievement] = useState<AchievementDef | null>(null);
   
-  const { stats, recordRoll, resetGame, setTotalRolls, unlockedDefs, availableDefs, totalAchievementCount } = useAchievements();
+  const { stats, recordRoll, resetGame, setTotalRolls, unlockAchievement, unlockedDefs, availableDefs, totalAchievementCount } = useAchievements();
 
   // Reset all progress including modifiers and skills
   const handleResetGame = useCallback(() => {
@@ -108,6 +111,7 @@ export const D100Roller = () => {
         totalCount={totalAchievementCount}
         onDebugRoll={debugRoll}
         onSetTotalRolls={setTotalRolls}
+        onUnlockAchievement={unlockAchievement}
       />
 
       <div className="mx-auto max-w-[min(100vw,calc(100vh-25rem))] max-h-[calc(100vh-25rem)] select-none">
@@ -118,15 +122,26 @@ export const D100Roller = () => {
           modifierBonuses={modifierBonuses}
           inventory={stats.inventory}
         />
-        <DiceGrid 
-          items={items} 
-          phase={phase} 
-          onClick={roll} 
-          result={result}
-          modifiers={modifiers}
-          modifiedResult={modifiedResult}
-          consumedIndices={consumedIndices}
-        />
+        <div className="relative">
+          <DiceGrid 
+            items={items} 
+            phase={phase} 
+            onClick={roll} 
+            result={result}
+            modifiers={modifiers}
+            modifiedResult={modifiedResult}
+            consumedIndices={consumedIndices}
+          />
+          {!unlockedDefs.some(d => d.id === "start") && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="bg-black/20 backdrop-blur-sm rounded-lg px-3 py-2">
+                <span className="text-xl font-scribble text-muted-foreground animate-pulse duration-10s">
+                  press grid to play
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
         
         {/* Modifier panel below grid - unlocked after ten-rolls */}
         <div className="flex flex-col justify-center mt-4 gap-4">
@@ -152,14 +167,36 @@ export const D100Roller = () => {
           {/* Controls row: fullscreen and achievements */}
           <div className="flex justify-center gap-2">
             <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
-            <AchievementButton
-              onClick={() => setAchievementPanelOpen(true)}
-              unlockedCount={unlockedDefs.length}
-              totalCount={totalAchievementCount}
-            />
+            <div className="relative">
+              <AchievementButton
+                onClick={() => {
+                  setAchievementPanelOpen(true);
+                  setTimeout(() => unlockAchievement("open-achievements"), 500);
+                }}
+                onInfoClick={() => setSelectedAchievement(unlockedDefs[unlockedDefs.length - 1] ?? null)}
+                unlockedCount={unlockedDefs.length}
+                totalCount={totalAchievementCount}
+                latestUnlocked={unlockedDefs[unlockedDefs.length - 1]}
+              />
+              {!unlockedDefs.some(d => d.id === "open-achievements") && (
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <span className="text-base font-scribble text-muted-foreground animate-pulse duration-10s">
+                    click to open achievements
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Achievement Detail Modal */}
+      <AchievementModal
+        achievement={selectedAchievement}
+        isUnlocked={true}
+        onClose={() => setSelectedAchievement(null)}
+        onUnlock={unlockAchievement}
+      />
     </div>
   );
 };

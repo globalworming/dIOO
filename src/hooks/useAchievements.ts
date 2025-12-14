@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { ACHIEVEMENT_DEFS, AchievementContext, GameStats, getAvailableAchievements, AchievementDef } from "@/data/achievements";
+import { ACHIEVEMENT_DEFS, AchievementContext, GameStats, getAvailableAchievements, AchievementDef, START_ACHIEVEMENT_ID } from "@/data/achievements";
+import { toast } from "sonner";
 
 export type { GameStats };
 
@@ -78,10 +79,14 @@ export const useAchievements = () => {
   }, [achievements, stats]);
 
   const unlockAchievement = useCallback((id: string) => {
-    setAchievements((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, unlocked: true } : a))
-    );
-  }, []);
+    const achievement = achievements.find(a => a.id === id);
+    if (achievement && !achievement.unlocked) {
+      setAchievements((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, unlocked: true } : a))
+      );
+      toast.success(`Achievement Unlocked: ${achievement.name}!`, { duration: 3000 });
+    }
+  }, [achievements]);
 
   // Build set of unlocked IDs for tree traversal
   const unlockedIds = useMemo(
@@ -105,11 +110,11 @@ export const useAchievements = () => {
       const ctx: AchievementContext = { naturalRoll, modifiedRoll, hasModifiers, stats: newStats };
 
       // Check start achievement first (always available)
-      const startAchievement = achievements.find(a => a.id === "start");
+      const startAchievement = achievements.find(a => a.id === START_ACHIEVEMENT_ID);
       if (!startAchievement?.unlocked) {
-        const startDef = ACHIEVEMENT_DEFS.find(d => d.id === "start");
+        const startDef = ACHIEVEMENT_DEFS.find(d => d.id === START_ACHIEVEMENT_ID);
         if (startDef?.condition(ctx)) {
-          unlockAchievement("start");
+          unlockAchievement(START_ACHIEVEMENT_ID);
           newlyUnlocked.push(startDef.name);
         }
       }
@@ -185,6 +190,18 @@ export const useAchievements = () => {
     setStats(prev => ({ ...prev, totalRolls: value }));
   }, []);
 
+  // Check achievements on page load after 2 seconds (for stat-based achievements like "init")
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const newlyUnlocked = checkAchievements(0, 0, false, stats);
+      newlyUnlocked.forEach((name) => {
+        toast.success(`Achievement Unlocked: ${name}!`, { duration: 3000 });
+      });
+    }, 2000);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return { 
     achievements, 
     stats, 
@@ -192,6 +209,8 @@ export const useAchievements = () => {
     resetGame,
     /** Debug: set total rolls directly */
     setTotalRolls,
+    /** Manually unlock an achievement by ID */
+    unlockAchievement,
     /** Achievements that are unlocked (walked from start) */
     unlockedDefs,
     /** Achievements available to unlock next (parent unlocked, not yet achieved) */

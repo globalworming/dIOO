@@ -17,6 +17,10 @@ export default {
         sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
+      transitionDuration: {
+         '0': '0ms',
+         '10s': '10s',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
