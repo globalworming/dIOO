@@ -70,14 +70,14 @@ export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses =
       </div>
       <div
         className={cn(
-          "result-display text-primary text-glow transition-all duration-500",
-          phase === "random" && "opacity-30 blur-sm",
-          phase === "sorting" && "opacity-60",
-          phase === "modifying" && "opacity-80",
-          phase === "sorted" && "opacity-100"
+          "result-display text-primary text-glow duration-500",
+          phase === "random" && "opacity-30 blur-sm [scale:0.9]",
+          phase === "sorting" && "opacity-30 blur-md [scale:0.8]",
+          phase === "modifying" && "opacity-80 [scale:0.9]",
+          phase === "sorted" && "opacity-100 animate-fade-in-up"
         )}
       >
-        {displayValue !== null ? displayValue : "—"}
+        {displayValue !== null ? displayValue : "🎲"}
       </div>
     </div>
   );
