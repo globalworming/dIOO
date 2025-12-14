@@ -51,7 +51,7 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
   {
     id: "init",
     name: "Participation Trophy",
-    description: "You showed up at least. I bet the devekopers are very appreciative of that",
+    description: "You showed up at least. I bet the developers are very appreciative of that",
     condition: () => true,
     next: ["start", "open-achievements"]
   },
