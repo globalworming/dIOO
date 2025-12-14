@@ -7,6 +7,7 @@ import { AchievementPanel } from "./AchievementPanel";
 import { AchievementModal } from "./AchievementModal";
 import { ModifierPanel, DEFAULT_MODIFIERS, Modifier } from "./ModifierPanel";
 import { SkillsPanel, DEFAULT_SKILLS, Skill } from "./SkillsPanel";
+import { Hint } from "./Hint";
 import { useAchievements } from "@/hooks/useAchievements";
 import { useRollAnimation } from "@/hooks/useRollAnimation";
 import type { AchievementDef } from "@/data/achievements";
@@ -133,25 +134,23 @@ export const D100Roller = () => {
             consumedIndices={consumedIndices}
           />
           {!unlockedDefs.some(d => d.id === "start") && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="bg-black/20 backdrop-blur-sm rounded-lg px-3 py-2">
-                <span className="text-xl font-scribble text-muted-foreground animate-pulse duration-10s">
-                  press grid to play
-                </span>
-              </div>
-            </div>
+            <Hint position="center">press grid to play</Hint>
           )}
         </div>
         
         {/* Modifier panel below grid - unlocked after ten-rolls */}
+        {/* TODO later: show when available modifiers > 0 */}
         <div className="flex flex-col justify-center mt-4 gap-4">
           {unlockedDefs.some(d => d.id === "ten-rolls") && (
-            <div className="flex justify-center">
+            <div className="relative flex justify-center">
               <ModifierPanel 
                 modifiers={modifiers} 
                 onToggle={toggleModifier}
                 disabled={isRolling}
               />
+              {!unlockedDefs.some(d => d.id === "first-mod") && (
+                <Hint>click to toggle</Hint>
+              )}
             </div>
           )}
           {/* Skills panel - unlocked after fifty-rolls */}
@@ -179,11 +178,7 @@ export const D100Roller = () => {
                 latestUnlocked={unlockedDefs[unlockedDefs.length - 1]}
               />
               {!unlockedDefs.some(d => d.id === "open-achievements") && (
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                  <span className="text-base font-scribble text-muted-foreground animate-pulse duration-10s">
-                    click to open achievements
-                  </span>
-                </div>
+                <Hint>click for achievements and statistics</Hint>
               )}
             </div>
           </div>

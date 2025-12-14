@@ -190,14 +190,13 @@ export const useAchievements = () => {
     setStats(prev => ({ ...prev, totalRolls: value }));
   }, []);
 
-  // Check achievements on page load after 2 seconds (for stat-based achievements like "init")
   useEffect(() => {
     const timer = setTimeout(() => {
       const newlyUnlocked = checkAchievements(0, 0, false, stats);
       newlyUnlocked.forEach((name) => {
         toast.success(`Achievement Unlocked: ${name}!`, { duration: 3000 });
       });
-    }, 2000);
+    }, 400);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
