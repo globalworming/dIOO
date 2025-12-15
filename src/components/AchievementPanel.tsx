@@ -63,7 +63,7 @@ export const AchievementPanel = ({
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div 
-              className="flex items-center gap-3 cursor-pointer"
+              className="flex items-center gap-3"
               onClick={() => setDebugClicks(c => c + 1)}
             >
               <Trophy className="w-5 h-5 text-primary" />
