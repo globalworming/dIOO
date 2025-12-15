@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { DiceItem } from "./DiceItem";
-import { Modifier, MODIFIER_COLORS, buildModifierColorMap } from "./ModifierPanel";
+import { Modifier, buildModifierColorMap } from "./ModifierPanel";
 
 interface DiceGridProps {
   items: boolean[];

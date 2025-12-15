@@ -1,133 +1,5 @@
 import { ModifierDef } from "@/components/ModifierPanel";
 
-// SVG backgrounds for each modifier button
-export const MODIFIER_BACKGROUNDS: Record<string, string> = {
-  empty: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="100" height="100" fill="transparent" stroke="hsla(0, 0%, 50%, 0.2)" stroke-width="1" stroke-dasharray="5,5"/>
-    </svg>
-  `)}`,
-
-  corners1: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="20" height="20" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="0" y="80" width="20" height="20" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="80" y="0" width="20" height="20" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="80" y="80" width="20" height="20" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  corners2: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="30" height="30" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="0" y="70" width="30" height="30" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  corners3: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="40" height="40" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="60" y="0" width="40" height="40" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="0" y="60" width="40" height="40" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="60" y="60" width="40" height="40" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  corners4: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="40" height="40" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="60" y="0" width="40" height="40" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="0" y="60" width="40" height="40" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="60" y="60" width="40" height="40" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  corners5: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="50" height="50" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="50" y="0" width="50" height="50" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="0" y="50" width="50" height="50" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-      <rect x="50" y="50" width="50" height="50" fill="hsla(38, 95%, 55%, 1)" stroke="hsla(38, 95%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  bullseye1: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="10" fill="hsla(0, 85%, 55%, 1)" stroke="hsla(0, 85%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  bullseye2: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="15" fill="hsla(0, 85%, 55%, 1)" stroke="hsla(0, 85%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  bullseye3: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="20" fill="hsla(0, 85%, 55%, 1)" stroke="hsla(0, 85%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  bullseye4: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="30" fill="hsla(0, 85%, 55%, 1)" stroke="hsla(0, 85%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  bullseye5: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40" fill="hsla(0, 85%, 55%, 1)" stroke="hsla(0, 85%, 55%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  diagonals1: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="5" height="100" fill="hsla(280, 85%, 55%, 1)" stroke="hsla(280, 85%, 55%, 1)" stroke-width="1" transform="rotate(45 50 50)"/>
-    </svg>
-  `)}`,
-  diagonals2: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="5" height="100" fill="hsla(280, 85%, 55%, 1)" stroke="hsla(280, 85%, 55%, 1)" stroke-width="1" transform="rotate(-45 50 50)"/>
-    </svg>
-  `)}`,
-  diagonals3: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="5" height="100" fill="hsla(280, 85%, 55%, 1)" stroke="hsla(280, 85%, 55%, 1)" stroke-width="1" transform="rotate(45 50 50)"/>
-      <rect x="0" y="0" width="5" height="100" fill="hsla(280, 85%, 55%, 1)" stroke="hsla(280, 85%, 55%, 1)" stroke-width="1" transform="rotate(-45 50 50)"/>
-    </svg>
-  `)}`,
-  diagonals4: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="10" height="100" fill="hsla(280, 85%, 55%, 1)" stroke="hsla(280, 85%, 55%, 1)" stroke-width="1" transform="rotate(45 50 50)"/>
-      <rect x="0" y="0" width="10" height="100" fill="hsla(280, 85%, 55%, 1)" stroke="hsla(280, 85%, 55%, 1)" stroke-width="1" transform="rotate(-45 50 50)"/>
-    </svg>
-  `)}`,
-  diagonals5: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="0" width="15" height="100" fill="hsla(280, 85%, 55%, 1)" stroke="hsla(280, 85%, 55%, 1)" stroke-width="1" transform="rotate(45 50 50)"/>
-      <rect x="0" y="0" width="15" height="100" fill="hsla(280, 85%, 55%, 1)" stroke="hsla(280, 85%, 55%, 1)" stroke-width="1" transform="rotate(-45 50 50)"/>
-    </svg>
-  `)}`,
-  cross1: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="40" y="0" width="20" height="100" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  cross2: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="40" width="100" height="20" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  cross3: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="40" width="100" height="20" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
-      <rect x="40" y="0" width="20" height="100" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  cross4: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="35" width="100" height="30" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
-      <rect x="35" y="0" width="30" height="100" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-  cross5: `data:image/svg+xml;base64,${btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <rect x="0" y="30" width="100" height="40" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
-      <rect x="30" y="0" width="40" height="100" fill="hsla(180, 85%, 45%, 1)" stroke="hsla(180, 85%, 45%, 1)" stroke-width="1"/>
-    </svg>
-  `)}`,
-};
 
 // Helper to create zone indices
 const createCorners1Zones = (): number[] => {
@@ -376,30 +248,194 @@ const createCross5Zones = (): number[] => {
   return zones;
 };
 
+// Dots variants
+const createDots1Zones = (): number[] => {
+  const zones = [];
+  for (let i = 0; i < 10; i++) {
+    // Column 0
+    zones.push(i * 10 + 0);
+  }
+  return zones;
+};
+
+const createDots2Zones = (): number[] => {
+  const zones = [];
+  for (let i = 0; i < 10; i++) {
+    // Column 9
+    zones.push(i * 10 + 9);
+  }
+  return zones;
+};
+
+const createDots3Zones = (): number[] => {
+  const zones = [];
+  for (let i = 0; i < 10; i++) {
+    // Columns 0 and 9
+    zones.push(i * 10 + 0);
+    zones.push(i * 10 + 9);
+  }
+  return zones;
+};
+
+const createDots4Zones = (): number[] => {
+  const zones = [];
+  for (let i = 0; i < 10; i++) {
+    // Columns 2 and 7
+    zones.push(i * 10 + 2);
+    zones.push(i * 10 + 7);
+  }
+  return zones;
+};
+
+const createDots5Zones = (): number[] => {
+  const zones = [];
+  for (let i = 0; i < 10; i++) {
+    // Columns 4 and 5 (center columns)
+    zones.push(i * 10 + 4);
+    zones.push(i * 10 + 5);
+  }
+  return zones;
+};
+
+// Waves variants
+const createWaves1Zones = (): number[] => {
+  const zones = [];
+  // Sine wave: y = 4.5 + 3.5 * sin(x/9 * 2*PI)
+  for (let j = 0; j < 10; j++) {
+    const y = 4.5 + 3.5 * Math.sin((j / 9) * 2 * Math.PI);
+    const i = Math.round(y);
+    if (i >= 0 && i < 10) zones.push(i * 10 + j);
+  }
+  return zones;
+};
+
+const createWaves2Zones = (): number[] => {
+  const zones = [];
+  // Cosine wave: y = 4.5 + 3.5 * cos(x/9 * 2*PI)
+  for (let j = 0; j < 10; j++) {
+    const y = 4.5 + 3.5 * Math.cos((j / 9) * 2 * Math.PI);
+    const i = Math.round(y);
+    if (i >= 0 && i < 10) zones.push(i * 10 + j);
+  }
+  return zones;
+};
+
+const createWaves3Zones = (): number[] => {
+  const zones = [];
+  // High freq wave: y = 4.5 + 3.5 * sin(x/9 * 4*PI)
+  for (let j = 0; j < 10; j++) {
+    const y = 4.5 + 3.5 * Math.sin((j / 9) * 4 * Math.PI);
+    const i = Math.round(y);
+    if (i >= 0 && i < 10) zones.push(i * 10 + j);
+  }
+  return zones;
+};
+
+const createWaves4Zones = (): number[] => {
+  const zones = [];
+  // Thick sine wave
+  for (let j = 0; j < 10; j++) {
+    const yCenter = 4.5 + 3.5 * Math.sin((j / 9) * 2 * Math.PI);
+    for (let i = 0; i < 10; i++) {
+        if (Math.abs(i - yCenter) <= 1.5) zones.push(i * 10 + j);
+    }
+  }
+  return zones;
+};
+
+const createWaves5Zones = (): number[] => {
+  const zones = [];
+  // Double wave
+  for (let j = 0; j < 10; j++) {
+    const y1 = 2 + 1.5 * Math.sin((j / 9) * 2 * Math.PI);
+    const y2 = 7 + 1.5 * Math.sin((j / 9) * 2 * Math.PI);
+    const i1 = Math.round(y1);
+    const i2 = Math.round(y2);
+    if (i1 >= 0 && i1 < 10) zones.push(i1 * 10 + j);
+    if (i2 >= 0 && i2 < 10) zones.push(i2 * 10 + j);
+  }
+  return zones;
+};
+
+// Modifier Color Themes
+export const MODIFIER_THEME_COLORS = {
+  corners: "hsl(38, 95%, 55%)",
+  bullseye: "hsl(0, 85%, 55%)",
+  diagonals: "hsl(280, 85%, 55%)",
+  cross: "hsl(180, 85%, 45%)",
+  dots: "hsl(100, 85%, 55%)",
+  waves: "hsl(100, 85%, 55%)",
+} as const;
+
+export const getModifierColor = (id: string): string => {
+  if (id.startsWith("corners")) return MODIFIER_THEME_COLORS.corners;
+  if (id.startsWith("bullseye")) return MODIFIER_THEME_COLORS.bullseye;
+  if (id.startsWith("diagonals")) return MODIFIER_THEME_COLORS.diagonals;
+  if (id.startsWith("cross")) return MODIFIER_THEME_COLORS.cross;
+  if (id.startsWith("dots")) return MODIFIER_THEME_COLORS.dots;
+  if (id.startsWith("waves")) return MODIFIER_THEME_COLORS.waves;
+  return "hsl(0, 0%, 50%)";
+};
+
 // All available modifiers (flat list)
 export const ALL_MODIFIERS: ModifierDef[] = [
-  // Corners
-  { id: "corners1", name: "Corners 1", description: "Small corners (2x2)", zones: createCorners1Zones(), color: "hsl(38, 95%, 55%)", backgroundKey: "corners1" },
-  { id: "corners2", name: "Corners 2", description: "Asymmetric corners", zones: createCorners2Zones(), color: "hsl(38, 95%, 55%)", backgroundKey: "corners2" },
-  { id: "corners3", name: "Corners 3", description: "Medium corners", zones: createCorners3Zones(), color: "hsl(38, 95%, 55%)", backgroundKey: "corners3" },
-  { id: "corners4", name: "Corners 4", description: "Large corners", zones: createCorners4Zones(), color: "hsl(38, 95%, 55%)", backgroundKey: "corners4" },
-  { id: "corners5", name: "Corners 5", description: "Full corners", zones: createCorners5Zones(), color: "hsl(38, 95%, 55%)", backgroundKey: "corners5" },
-  // Bullseye
-  { id: "bullseye1", name: "Bullseye 1", description: "Tiny center (2x2)", zones: createBullseye1Zones(), color: "hsl(0, 85%, 55%)", backgroundKey: "bullseye1" },
-  { id: "bullseye2", name: "Bullseye 2", description: "Small center (3x3)", zones: createBullseye2Zones(), color: "hsl(0, 85%, 55%)", backgroundKey: "bullseye2" },
-  { id: "bullseye3", name: "Bullseye 3", description: "Medium center (4x4)", zones: createBullseye3Zones(), color: "hsl(0, 85%, 55%)", backgroundKey: "bullseye3" },
-  { id: "bullseye4", name: "Bullseye 4", description: "Large center (6x6)", zones: createBullseye4Zones(), color: "hsl(0, 85%, 55%)", backgroundKey: "bullseye4" },
-  { id: "bullseye5", name: "Bullseye 5", description: "Huge center (8x8)", zones: createBullseye5Zones(), color: "hsl(0, 85%, 55%)", backgroundKey: "bullseye5" },
-  // Diagonals
-  { id: "diagonals1", name: "Diagonals 1", description: "Main diagonal", zones: createDiagonals1Zones(), color: "hsl(280, 85%, 55%)", backgroundKey: "diagonals1" },
-  { id: "diagonals2", name: "Diagonals 2", description: "Anti-diagonal", zones: createDiagonals2Zones(), color: "hsl(280, 85%, 55%)", backgroundKey: "diagonals2" },
-  { id: "diagonals3", name: "Diagonals 3", description: "Both diagonals (thin)", zones: createDiagonals3Zones(), color: "hsl(280, 85%, 55%)", backgroundKey: "diagonals3" },
-  { id: "diagonals4", name: "Diagonals 4", description: "Both diagonals (medium)", zones: createDiagonals4Zones(), color: "hsl(280, 85%, 55%)", backgroundKey: "diagonals4" },
-  { id: "diagonals5", name: "Diagonals 5", description: "Both diagonals (wide)", zones: createDiagonals5Zones(), color: "hsl(280, 85%, 55%)", backgroundKey: "diagonals5" },
-  // Cross
-  { id: "cross1", name: "Cross 1", description: "Vertical line", zones: createCross1Zones(), color: "hsl(180, 85%, 45%)", backgroundKey: "cross1" },
-  { id: "cross2", name: "Cross 2", description: "Horizontal line", zones: createCross2Zones(), color: "hsl(180, 85%, 45%)", backgroundKey: "cross2" },
-  { id: "cross3", name: "Cross 3", description: "Thin cross", zones: createCross3Zones(), color: "hsl(180, 85%, 45%)", backgroundKey: "cross3" },
-  { id: "cross4", name: "Cross 4", description: "Medium cross", zones: createCross4Zones(), color: "hsl(180, 85%, 45%)", backgroundKey: "cross4" },
-  { id: "cross5", name: "Cross 5", description: "Wide cross", zones: createCross5Zones(), color: "hsl(180, 85%, 45%)", backgroundKey: "cross5" },
+  { id: "corners1", zones: createCorners1Zones(), color: MODIFIER_THEME_COLORS.corners },
+  { id: "corners2", zones: createCorners2Zones(), color: MODIFIER_THEME_COLORS.corners },
+  { id: "corners3", zones: createCorners3Zones(), color: MODIFIER_THEME_COLORS.corners },
+  { id: "corners4", zones: createCorners4Zones(), color: MODIFIER_THEME_COLORS.corners },
+  { id: "corners5", zones: createCorners5Zones(), color: MODIFIER_THEME_COLORS.corners },
+  { id: "bullseye1", zones: createBullseye1Zones(), color: MODIFIER_THEME_COLORS.bullseye },
+  { id: "bullseye2", zones: createBullseye2Zones(), color: MODIFIER_THEME_COLORS.bullseye },
+  { id: "bullseye3", zones: createBullseye3Zones(), color: MODIFIER_THEME_COLORS.bullseye },
+  { id: "bullseye4", zones: createBullseye4Zones(), color: MODIFIER_THEME_COLORS.bullseye },
+  { id: "bullseye5", zones: createBullseye5Zones(), color: MODIFIER_THEME_COLORS.bullseye },
+  { id: "diagonals1", zones: createDiagonals1Zones(), color: MODIFIER_THEME_COLORS.diagonals },
+  { id: "diagonals2", zones: createDiagonals2Zones(), color: MODIFIER_THEME_COLORS.diagonals },
+  { id: "diagonals3", zones: createDiagonals3Zones(), color: MODIFIER_THEME_COLORS.diagonals },
+  { id: "diagonals4", zones: createDiagonals4Zones(), color: MODIFIER_THEME_COLORS.diagonals },
+  { id: "diagonals5", zones: createDiagonals5Zones(), color: MODIFIER_THEME_COLORS.diagonals },
+  { id: "cross1", zones: createCross1Zones(), color: MODIFIER_THEME_COLORS.cross },
+  { id: "cross2", zones: createCross2Zones(), color: MODIFIER_THEME_COLORS.cross },
+  { id: "cross3", zones: createCross3Zones(), color: MODIFIER_THEME_COLORS.cross },
+  { id: "cross4", zones: createCross4Zones(), color: MODIFIER_THEME_COLORS.cross },
+  { id: "cross5", zones: createCross5Zones(), color: MODIFIER_THEME_COLORS.cross },
+  { id: "dots1", zones: createDots1Zones(), color: MODIFIER_THEME_COLORS.dots },
+  { id: "dots2", zones: createDots2Zones(), color: MODIFIER_THEME_COLORS.dots },
+  { id: "dots3", zones: createDots3Zones(), color: MODIFIER_THEME_COLORS.dots },
+  { id: "dots4", zones: createDots4Zones(), color: MODIFIER_THEME_COLORS.dots },
+  { id: "dots5", zones: createDots5Zones(), color: MODIFIER_THEME_COLORS.dots },
+  { id: "waves1", zones: createWaves1Zones(), color: MODIFIER_THEME_COLORS.waves },
+  { id: "waves2", zones: createWaves2Zones(), color: MODIFIER_THEME_COLORS.waves },
+  { id: "waves3", zones: createWaves3Zones(), color: MODIFIER_THEME_COLORS.waves },
+  { id: "waves4", zones: createWaves4Zones(), color: MODIFIER_THEME_COLORS.waves },
+  { id: "waves5", zones: createWaves5Zones(), color: MODIFIER_THEME_COLORS.waves },
 ];
+
+// Helper to generate SVG data URI from zones and color
+const generateModifierSvg = (zones: number[], color: string): string => {
+  const rects = zones.map(zoneIdx => {
+    const row = Math.floor(zoneIdx / 10);
+    const col = zoneIdx % 10;
+    return `<rect x="${col}" y="${row}" width="1" height="1" fill="${color}"/>`;
+  }).join('');
+
+  return `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+      ${rects}
+    </svg>
+  `)}`;
+};
+
+// SVG backgrounds map (generated from modifiers)
+export const MODIFIER_BACKGROUNDS: Record<string, string> = {
+  empty: `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect x="0" y="0" width="100" height="100" fill="transparent" stroke="hsla(0, 0%, 50%, 0.2)" stroke-width="1" stroke-dasharray="5,5"/>
+    </svg>
+  `)}`,
+};
+
+// Populate backgrounds from modifiers
+ALL_MODIFIERS.forEach(mod => {
+  MODIFIER_BACKGROUNDS[mod.id] = generateModifierSvg(mod.zones, mod.color);
+});

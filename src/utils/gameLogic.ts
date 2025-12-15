@@ -1,4 +1,5 @@
-import { Modifier, ModifierBonus, MODIFIER_COLORS, buildModifierColorMap } from "../components/ModifierPanel";
+import { Modifier, ModifierBonus, buildModifierColorMap } from "../components/ModifierPanel";
+import { getModifierColor } from "../data/modifiers";
 import { Skill, SKILL_PATTERNS } from "../components/SkillsPanel";
 import { toast } from "sonner";
 
@@ -57,7 +58,7 @@ export const calculateModifierBonuses = (
         countedIndices.add(zoneIndex);
       }
     }
-    return { color: MODIFIER_COLORS[mod.id], bonus };
+    return { color: getModifierColor(mod.id), bonus };
   });
 };
 

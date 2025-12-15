@@ -1,54 +1,24 @@
 import { Button } from "./ui/button";
 import { Edit2, X } from "lucide-react";
 import { useState } from "react";
-import { MODIFIER_BACKGROUNDS, ALL_MODIFIERS } from "@/data/modifiers";
+import { MODIFIER_BACKGROUNDS, getModifierColor } from "@/data/modifiers";
 
 export interface Modifier {
   id: string;
-  name: string;
-  description: string;
   active: boolean;
   zones: number[]; // indices 0-99 that score bonus
 }
 
 export interface ModifierDef {
   id: string;
-  name: string;
-  description: string;
   zones: number[];
   color: string;
-  backgroundKey: string;
 }
 
 export interface SlotState {
   modifierId: string | null;
   active: boolean;
 }
-
-// Modifier colors for dots and result display
-export const MODIFIER_COLORS: Record<string, string> = {
-  corners1: "hsl(38, 95%, 55%)",
-  corners2: "hsl(38, 95%, 55%)",
-  corners3: "hsl(38, 95%, 55%)",
-  corners4: "hsl(38, 95%, 55%)",
-  corners5: "hsl(38, 95%, 55%)",
-  bullseye1: "hsl(0, 85%, 55%)",
-  bullseye2: "hsl(0, 85%, 55%)",
-  bullseye3: "hsl(0, 85%, 55%)",
-  bullseye4: "hsl(0, 85%, 55%)",
-  bullseye5: "hsl(0, 85%, 55%)",
-  diagonals1: "hsl(280, 85%, 55%)",
-  diagonals2: "hsl(280, 85%, 55%)",
-  diagonals3: "hsl(280, 85%, 55%)",
-  diagonals4: "hsl(280, 85%, 55%)",
-  diagonals5: "hsl(280, 85%, 55%)",
-  cross1: "hsl(180, 85%, 45%)",
-  cross2: "hsl(180, 85%, 45%)",
-  cross3: "hsl(180, 85%, 45%)",
-  cross4: "hsl(180, 85%, 45%)",
-  cross5: "hsl(180, 85%, 45%)",
-};
-
 
 /**
  * Pre-build a 100-element color map from active modifiers.
@@ -57,7 +27,7 @@ export const MODIFIER_COLORS: Record<string, string> = {
 export const buildModifierColorMap = (activeModifiers: Modifier[]): (string | undefined)[] => {
   const colors: (string | undefined)[] = new Array(100).fill(undefined);
   for (const mod of activeModifiers) {
-    const color = MODIFIER_COLORS[mod.id];
+    const color = getModifierColor(mod.id);
     for (const idx of mod.zones) {
       if (colors[idx] === undefined) {
         colors[idx] = color;
@@ -78,8 +48,6 @@ export const slotsToModifiers = (slots: SlotState[], allModifiers: ModifierDef[]
       if (!def) return null;
       return {
         id: def.id,
-        name: def.name,
-        description: def.description,
         active: true,
         zones: def.zones,
       };
@@ -158,7 +126,7 @@ export const ModifierPanel = ({ slots, allModifiers, onSlotsChange, disabled }: 
             }`}
             onClick={() => handleSlotClick(index)}
             disabled={disabled || !slot.modifierId}
-            title={slot.modifierId ? `${allModifiers.find(m => m.id === slot.modifierId)?.name} (click to toggle)` : "Empty slot"}
+            title={slot.modifierId ? `${allModifiers.find(m => m.id === slot.modifierId)?.id} (click to toggle)` : "Empty slot"}
             style={{
               backgroundImage: `url("${getSlotBackground(slot)}")`,
               backgroundSize: '100% 100%',
@@ -208,10 +176,12 @@ export const ModifierPanel = ({ slots, allModifiers, onSlotsChange, disabled }: 
                     } ${!canSelect ? "border-primary/30" : ""}`}
                     onClick={() => canSelect && handleModifierToggle(mod.id)}
                     disabled={!canSelect}
-                    title={`${mod.name}: ${mod.description}`}
+                    title={mod.id}
                     style={{
                       backgroundImage: `url("${MODIFIER_BACKGROUNDS[mod.id]}")`,
-                      backgroundSize: '100% 100%',
+                      backgroundSize: 'contain',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
                       opacity: isSelected ? 1 : 0.5,
                     }}
                   />
