@@ -5,7 +5,7 @@ import { FullscreenButton } from "./FullscreenButton";
 import { AchievementButton } from "./AchievementButton";
 import { AchievementPanel } from "./AchievementPanel";
 import { AchievementModal } from "./AchievementModal";
-import { ModifierPanel, DEFAULT_MODIFIERS, Modifier } from "./ModifierPanel";
+import { ModifierPanel, ALL_MODIFIERS, DEFAULT_SLOTS, slotsToModifiers, type SlotState } from "./ModifierPanel";
 import { SkillsPanel, DEFAULT_SKILLS, Skill } from "./SkillsPanel";
 import { Hint } from "./Hint";
 import { useAchievements } from "@/hooks/useAchievements";
@@ -16,7 +16,8 @@ import { useVersionCheck } from "@/hooks/useVersionCheck";
 export const D100Roller = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [achievementPanelOpen, setAchievementPanelOpen] = useState(false);
-  const [modifiers, setModifiers] = useState<Modifier[]>(DEFAULT_MODIFIERS);
+  const [slots, setSlots] = useState<SlotState[]>(DEFAULT_SLOTS);
+  const modifiers = slotsToModifiers(slots, ALL_MODIFIERS);
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementDef | null>(null);
   const { clearVersion } = useVersionCheck();
@@ -26,7 +27,7 @@ export const D100Roller = () => {
   // Reset all progress including modifiers and skills
   const handleResetGame = useCallback(() => {
     resetGame();
-    setModifiers(DEFAULT_MODIFIERS.map(m => ({ ...m, active: false })));
+    setSlots(DEFAULT_SLOTS);
     setSkills(DEFAULT_SKILLS.map(s => ({ ...s, active: false })));
     clearVersion();
     window.location.reload();
@@ -60,10 +61,8 @@ export const D100Roller = () => {
     onSkillsTriggered: handleSkillsTriggered,
   });
 
-  const toggleModifier = useCallback((id: string) => {
-    setModifiers(prev => prev.map(m => 
-      m.id === id ? { ...m, active: !m.active } : m
-    ));
+  const handleSlotsChange = useCallback((newSlots: SlotState[]) => {
+    setSlots(newSlots);
   }, []);
 
   const toggleSkill = useCallback((id: string) => {
@@ -148,8 +147,9 @@ export const D100Roller = () => {
           {unlockedDefs.some(d => d.id === "ten-rolls") && (
             <div className="relative flex justify-center">
               <ModifierPanel 
-                modifiers={modifiers} 
-                onToggle={toggleModifier}
+                slots={slots}
+                allModifiers={ALL_MODIFIERS}
+                onSlotsChange={handleSlotsChange}
                 disabled={isRolling}
               />
               {!unlockedDefs.some(d => d.id === "first-mod") && (

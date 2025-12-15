@@ -12,6 +12,8 @@ const App = () => (
     <HashRouter>
       <Routes>
         <Route path="/" element={<Index />} />
+        {/* FIXME: create achievement overview page with directed graph visualization */}
+        {/* FIXME: create modifiers background and zone overview page */}
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

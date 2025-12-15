@@ -123,17 +123,18 @@ export const SkillsPanel = ({ skills, onToggle, disabled }: SkillsPanelProps) =>
           key={skill.id}
           variant={"link"}
           size="sm"
-          className={`w-10 h-10 p-0 transition-all duration-700 relative overflow-hidden bg-background ${
+          className={`w-14 h-14 transition-all hover:border-white/50 ease-in-out duration-200 relative overflow-hidden ${
             skill.active 
-              ? "ring-2 ring-primary" 
-              : "ring-1 ring-background hover:ring-4 hover:ring-primary/20"
-          } ${skill.triggered ? "ring-8 ring-muted bg-primary" : ""}`}
+              ? "border-2 border-primary bg-white/5" 
+              : "border-2 border-primary/50"
+          } ${skill.triggered ? "border-4 border-primary bg-primary/10" : ""}`}
           onClick={() => onToggle(skill.id)}
           disabled={disabled}
           title={skill.name}
           style={{
             backgroundImage: `url("${skill.svg}")`,
             backgroundSize: '100% 100%',
+            backgroundPosition: 'center',
           }}
         >
           <span className="relative z-10"></span>
