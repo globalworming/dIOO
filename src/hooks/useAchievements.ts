@@ -22,7 +22,7 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = ACHIEVEMENT_DEFS.map(def => ({
   unlockedAt: undefined,
 }));
 
-const STORAGE_KEY = "d100-game-state";
+const STORAGE_KEY = "dioo-game-state";
 
 interface StoredState {
   achievements: Achievement[];

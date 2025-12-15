@@ -11,6 +11,7 @@ import { Hint } from "./Hint";
 import { useAchievements } from "@/hooks/useAchievements";
 import { useRollAnimation } from "@/hooks/useRollAnimation";
 import type { AchievementDef } from "@/data/achievements";
+import { useVersionCheck } from "@/hooks/useVersionCheck";
 
 export const D100Roller = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -18,6 +19,7 @@ export const D100Roller = () => {
   const [modifiers, setModifiers] = useState<Modifier[]>(DEFAULT_MODIFIERS);
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementDef | null>(null);
+  const { clearVersion } = useVersionCheck();
   
   const { stats, recordRoll, resetGame, setTotalRolls, unlockAchievement, unlockedDefs, unlockedDefsSorted, availableDefs, totalAchievementCount, latestUnlockedDef } = useAchievements();
 
@@ -26,8 +28,9 @@ export const D100Roller = () => {
     resetGame();
     setModifiers(DEFAULT_MODIFIERS.map(m => ({ ...m, active: false })));
     setSkills(DEFAULT_SKILLS.map(s => ({ ...s, active: false })));
+    clearVersion();
     window.location.reload();
-  }, [resetGame]);
+  }, [resetGame, clearVersion]);
 
   // Handle skill trigger animations
   const handleSkillsTriggered = useCallback((triggeredIds: Set<string>) => {

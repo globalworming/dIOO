@@ -3,6 +3,8 @@ import { Trophy, X, RotateCcw, Lock, Check, Sparkles } from "lucide-react";
 import type { GameStats } from "@/hooks/useAchievements";
 import type { AchievementDef } from "@/data/achievements";
 import { AchievementModal } from "./AchievementModal";
+import { Hint } from "./Hint";
+import { useVersionCheck } from "@/hooks/useVersionCheck";
 import { cn } from "@/lib/utils";
 
 interface AchievementPanelProps {
@@ -39,6 +41,7 @@ export const AchievementPanel = ({
   const [debugClicks, setDebugClicks] = useState(0);
   const showDebug = debugClicks >= 5;
   const [selectedAchievement, setSelectedAchievement] = useState<{ def: AchievementDef; unlocked: boolean } | null>(null);
+  const { hasUpdate, latestVersion } = useVersionCheck();
 
   return (
     <>
@@ -204,8 +207,12 @@ export const AchievementPanel = ({
                 onReset();
               }
             }}
-            className="mt-4 w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive hover:bg-destructive/20 transition-colors shrink-0"
+            className="mt-4 w-full relative flex items-center justify-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive hover:bg-destructive/20 transition-colors shrink-0"
           >
+            {hasUpdate && (
+                <Hint>new version {latestVersion}, click to update</Hint>
+            )}
+
             <RotateCcw className="w-4 h-4" />
             Reset Progress
           </button>
