@@ -21,7 +21,7 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
         " overflow-hidden",
         phase === "sorting" && "transition-all duration-700 ease-out",
         highlighted && "ring-primary/10 bg-secondary/60",
-        consumed && "rounded-full [scale:0.5] ring-0"
+        consumed && "rounded-full [scale:0.1] ring-0"
       )}
       style={{
         borderColor: modifierColor,
@@ -35,7 +35,7 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
             "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-500",
             highlighted && hasDot && "[scale:2]",
             !modifierColor && "bg-primary",
-            consumed && "[scale:5]"
+            consumed && "[scale:5]" 
           )}
           style={{
             animationDelay: `${sortedIndex * 20}ms`,
