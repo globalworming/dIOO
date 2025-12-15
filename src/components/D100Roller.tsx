@@ -26,6 +26,7 @@ export const D100Roller = () => {
     resetGame();
     setModifiers(DEFAULT_MODIFIERS.map(m => ({ ...m, active: false })));
     setSkills(DEFAULT_SKILLS.map(s => ({ ...s, active: false })));
+    window.location.reload();
   }, [resetGame]);
 
   // Handle skill trigger animations
