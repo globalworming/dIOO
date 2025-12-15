@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { DiceItem } from "./DiceItem";
 import { Modifier, MODIFIER_COLORS, buildModifierColorMap } from "./ModifierPanel";
 
@@ -27,6 +27,29 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
   
   // Pre-build color map for O(1) lookups in render loop
   const colorMap = useMemo(() => buildModifierColorMap(activeModifiers), [activeModifiers]);
+
+  // Stagger consumed indices animation (600ms total or 30ms per item max)
+  const [visibleConsumed, setVisibleConsumed] = useState<Set<number>>(new Set());
+  
+  useEffect(() => {
+    if (consumedIndices.size === 0) {
+      setVisibleConsumed(new Set());
+      return;
+    }
+    
+    const indices = Array.from(consumedIndices).sort(() => Math.random() - 0.5);
+    const delayPerItem = Math.min(30, 400 / indices.length);
+    
+    const timeouts: NodeJS.Timeout[] = [];
+    indices.forEach((idx, i) => {
+      const timeout = setTimeout(() => {
+        setVisibleConsumed(prev => new Set([...prev, idx]));
+      }, i * delayPerItem);
+      timeouts.push(timeout);
+    });
+    
+    return () => timeouts.forEach(clearTimeout);
+  }, [consumedIndices]);
 
   /**
    * Visual sorting animation: reorder grid cells so empty cells appear first (top-left),
@@ -140,7 +163,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
               sortedIndex={getSortedIndex(index)}
               highlighted={highlightedZones.has(index)}
               modifierColor={colorMap[index]}
-              consumed={consumedIndices.has(getSortedIndex(index))}
+              consumed={visibleConsumed.has(getSortedIndex(index))}
             />
           ))}
         </div>
