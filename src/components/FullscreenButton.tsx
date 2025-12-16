@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { Maximize, Minimize } from "lucide-react";
-import { Button } from "./ui/button";
 
 interface FullscreenButtonProps {
   isFullscreen: boolean;
@@ -9,16 +8,19 @@ interface FullscreenButtonProps {
 
 export const FullscreenButton = ({ isFullscreen, onToggle }: FullscreenButtonProps) => {
   return (
-    <Button
-    variant="link"
+    <button
       onClick={onToggle}
+      className={cn(
+        "p-3 rounded-lg glass",
+        "hover:bg-secondary/80 transition-colors"
+      )}
       title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
     >
       {isFullscreen ? (
-        <Minimize className="w-10 h-10" />
+        <Minimize className="w-5 h-5" />
       ) : (
-        <Maximize className="w-10 h-10" />
+        <Maximize className="w-5 h-5" />
       )}
-    </Button>
+    </button>
   );
 };

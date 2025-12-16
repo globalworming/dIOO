@@ -235,8 +235,18 @@ export const D100Roller = () => {
               />
             </div>
           )}
-          {/* Achievements row */}
+          {/* Controls row: fullscreen and achievements */}
           <div className="flex justify-center gap-2">
+            <Button
+              variant={keystoneEditMode ? "default" : "ghost"}
+              className="w-14 h-14"
+              onClick={() => setKeystoneEditMode(!keystoneEditMode)}
+              disabled={isRolling}
+              title={`Set keystones (${keystones.size}/${MAX_KEYSTONES})`}
+            >
+              <Locate className="w-5 h-5" />
+            </Button>
+            <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
             <div className="relative">
               <AchievementButton
                 onClick={() => {
@@ -255,18 +265,6 @@ export const D100Roller = () => {
                 <Hint>unlock patterns</Hint>
               )}
             </div>
-          </div>
-             {/* Keystone and fullscreen row */}
-          <div className="flex justify-center gap-2">
-            <Button
-              variant="link"
-              onClick={() => setKeystoneEditMode(!keystoneEditMode)}
-              disabled={isRolling}
-              title={`Set keystones (${keystones.size}/${MAX_KEYSTONES})`}
-            >
-              <Locate className="w-5 h-5" />
-            </Button>
-            <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
           </div>
         </div>
       </div>
