@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { DiceGrid } from "./DiceGrid";
 import { ResultDisplay } from "./ResultDisplay";
 import { FullscreenButton } from "./FullscreenButton";
@@ -15,15 +15,28 @@ import type { AchievementDef } from "@/data/achievements";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
 
 export const D100Roller = () => {
+  const { stats, recordRoll, resetGame, setTotalRolls, addInventoryResources, unlockAchievement, unlockedDefs, unlockedDefsSorted, availableDefs, totalAchievementCount, latestUnlockedDef } = useAchievements();
+
+  // Filter modifiers based on unlocked achievements
+  const availableModifiers = useMemo(() => {
+    const unlockedIds = new Set(unlockedDefs.map(d => d.id));
+    
+    return ALL_MODIFIERS.filter(modifier => {      
+      // Corners progression: corners2 when corners-1 unlocked, corners3 when corners-2 unlocked
+      if (modifier.id === 'corners2' && unlockedIds.has('corners-1')) return true;
+      if (modifier.id === 'corners3' && unlockedIds.has('corners-2')) return true;
+      
+      return false;
+    });
+  }, [unlockedDefs]);
+
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [achievementPanelOpen, setAchievementPanelOpen] = useState(false);
   const [slots, setSlots] = useState<SlotState[]>(DEFAULT_SLOTS);
-  const modifiers = slotsToModifiers(slots, ALL_MODIFIERS);
+  const modifiers = slotsToModifiers(slots, availableModifiers);
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementDef | null>(null);
   const { clearVersion } = useVersionCheck();
-  
-  const { stats, recordRoll, resetGame, setTotalRolls, unlockAchievement, unlockedDefs, unlockedDefsSorted, availableDefs, totalAchievementCount, latestUnlockedDef } = useAchievements();
 
   // Reset all progress including modifiers and skills
   const handleResetGame = useCallback(() => {
@@ -116,6 +129,7 @@ export const D100Roller = () => {
         totalCount={totalAchievementCount}
         onDebugRoll={debugRoll}
         onSetTotalRolls={setTotalRolls}
+        onAddInventoryResources={addInventoryResources}
         onUnlockAchievement={unlockAchievement}
       />
 
@@ -149,12 +163,12 @@ export const D100Roller = () => {
             <div className="relative flex justify-center">
               <ModifierPanel 
                 slots={slots}
-                allModifiers={ALL_MODIFIERS}
+                allModifiers={availableModifiers}
                 onSlotsChange={handleSlotsChange}
                 disabled={isRolling}
               />
-              {!unlockedDefs.some(d => d.id === "first-mod") && (
-                <Hint>click to toggle</Hint>
+              {unlockedDefs.some(d => d.id === "ten-rolls") && !unlockedDefs.some(d => d.id === "first-mod") && availableModifiers.length > 0 && (
+                <Hint>set patterns, click to toggle</Hint>
               )}
             </div>
           )}
@@ -184,6 +198,9 @@ export const D100Roller = () => {
               />
               {!unlockedDefs.some(d => d.id === "open-achievements") && (
                 <Hint>click for achievements and statistics</Hint>
+              )}
+              {unlockedDefs.some(d => d.id === "ten-rolls") && !unlockedDefs.some(d => d.id === "first-mod") && availableModifiers.length === 0 && (
+                <Hint>unlock patterns</Hint>
               )}
             </div>
           </div>

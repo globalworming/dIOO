@@ -86,14 +86,36 @@ export const useAchievements = () => {
 
   const unlockAchievement = useCallback((id: string) => {
     const achievement = achievements.find(a => a.id === id);
-    if (achievement && !achievement.unlocked) {
+    const achievementDef = ACHIEVEMENT_DEFS.find(d => d.id === id);
+    if (achievement && !achievement.unlocked && achievementDef) {
+      // Check if achievement requires resources and deduct them
+      if (achievementDef.manualUnlockResourceSpent) {
+        const requiredResources = achievementDef.manualUnlockResourceSpent();
+        const newInventory = { ...stats.inventory };
+        
+        // Deduct rolls
+        if (requiredResources.rolls) {
+          newInventory.rolls = Math.max(0, newInventory.rolls - requiredResources.rolls);
+        }
+        
+        // Deduct colors
+        Object.entries(requiredResources).forEach(([resource, amount]) => {
+          if (resource !== 'rolls' && typeof amount === 'number') {
+            newInventory.colors[resource] = Math.max(0, (newInventory.colors[resource] || 0) - amount);
+          }
+        });
+        
+        // Update stats with new inventory
+        setStats(prev => ({ ...prev, inventory: newInventory }));
+      }
+      
       setAchievements((prev) =>
         prev.map((a) => (a.id === id ? { ...a, unlocked: true, unlockedAt: Date.now() } : a))
       );
       setLatestUnlockedId(id);
       toast.success(`Achievement Unlocked: ${achievement.name}!`, { duration: 3000 });
     }
-  }, [achievements]);
+  }, [achievements, stats.inventory]);
 
   // Build set of unlocked IDs for tree traversal
   const unlockedIds = useMemo(
@@ -172,7 +194,7 @@ export const useAchievements = () => {
       const newRecentRolls = [naturalRoll, ...stats.recentRolls].slice(0, 3);
 
       const newInventory = { ...stats.inventory };
-      if (achievements.find(a => a.id === "first-mod")?.unlocked ?? false) {
+      if (achievements.find(a => a.id === "five-rolls")?.unlocked ?? false) {
         // Add color bonuses to inventory
         const newInventoryColors = { ...newInventory.colors };
         bonuses.forEach(({ color, bonus }) => {
@@ -212,6 +234,28 @@ export const useAchievements = () => {
     setStats(prev => ({ ...prev, totalRolls: value }));
   }, []);
 
+  const addInventoryResources = useCallback((resources: { rolls?: number; colors?: Record<string, number> }) => {
+    setStats(prev => {
+      const newInventory = { ...prev.inventory };
+      
+      // Add rolls
+      if (resources.rolls) {
+        newInventory.rolls = Math.min(INVENTORY_CAP, newInventory.rolls + resources.rolls);
+      }
+      
+      // Add colors
+      if (resources.colors) {
+        const newColors = { ...newInventory.colors };
+        Object.entries(resources.colors).forEach(([color, amount]) => {
+          newColors[color] = Math.min(INVENTORY_CAP, (newColors[color] || 0) + amount);
+        });
+        newInventory.colors = newColors;
+      }
+      
+      return { ...prev, inventory: newInventory };
+    });
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       const newlyUnlocked = checkAchievements(0, 0, false, stats);
@@ -230,6 +274,8 @@ export const useAchievements = () => {
     resetGame,
     /** Debug: set total rolls directly */
     setTotalRolls,
+    /** Debug: add inventory resources */
+    addInventoryResources,
     /** Manually unlock an achievement by ID */
     unlockAchievement,
     /** Achievements that are unlocked (walked from start) */

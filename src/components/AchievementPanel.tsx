@@ -22,6 +22,8 @@ interface AchievementPanelProps {
   onDebugRoll?: (naturalRoll: number) => void;
   /** Debug: set total rolls stat directly */
   onSetTotalRolls?: (value: number) => void;
+  /** Debug: add inventory resources */
+  onAddInventoryResources?: (resources: { rolls?: number; colors?: Record<string, number> }) => void;
   /** Manually unlock an achievement */
   onUnlockAchievement?: (id: string) => void;
 }
@@ -36,6 +38,7 @@ export const AchievementPanel = ({
   totalCount,
   onDebugRoll,
   onSetTotalRolls,
+  onAddInventoryResources,
   onUnlockAchievement,
 }: AchievementPanelProps) => {
   const [debugClicks, setDebugClicks] = useState(0);
@@ -140,8 +143,8 @@ export const AchievementPanel = ({
                     >
                       <div className={cn(
                         `w-8 h-8 rounded-full flex items-center justify-center shrink-0`,
-                        def.unlock ? 'ring-1 ring-amber-500' : '')}>
-                        {def.unlock ? (
+                        def.manualUnlockResourceSpent ? 'ring-1 ring-amber-500' : '')}>
+                        {def.manualUnlockResourceSpent ? (
                           <Sparkles className="w-4 h-4 text-amber-500" />
                         ) : (
                           <Lock className="w-4 h-4 text-muted-foreground" />
@@ -198,6 +201,35 @@ export const AchievementPanel = ({
                 </div>
               </div>
             )}
+
+            {/* Debug Inventory Controls */}
+            {showDebug && onAddInventoryResources && (
+              <div className="p-2 border border-yellow-500/50 rounded-lg">
+                <div className="text-xs text-yellow-500 mb-2">Debug: Add Inventory Resources</div>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => onAddInventoryResources({ rolls: 500 })}
+                    className="w-full text-xs p-2 rounded bg-yellow-500/20 hover:bg-yellow-500/40 transition-colors"
+                  >
+                    Add 500 Rolls
+                  </button>
+                  <button
+                    onClick={() => onAddInventoryResources({ 
+                      colors: {
+                        "hsl(38, 95%, 55%)": 150, // corners
+                        "hsl(0, 85%, 55%)": 150,   // bullseye
+                        "hsl(280, 85%, 55%)": 150, // diagonals
+                        "hsl(180, 85%, 45%)": 150, // cross
+                        "hsl(100, 85%, 55%)": 150, // dots/waves
+                      }
+                    })}
+                    className="w-full text-xs p-2 rounded bg-yellow-500/20 hover:bg-yellow-500/40 transition-colors"
+                  >
+                    Add 150 of Each Color
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Reset Button - Fixed at bottom */}
@@ -225,6 +257,7 @@ export const AchievementPanel = ({
         isUnlocked={selectedAchievement?.unlocked ?? false}
         onClose={() => setSelectedAchievement(null)}
         onUnlock={onUnlockAchievement}
+        stats={stats}
       />
     </>
   );

@@ -1,3 +1,5 @@
+import { MODIFIER_THEME_COLORS } from "./modifiers";
+
 export interface GameStats {
   highestRoll: number;
   totalSum: number;
@@ -35,8 +37,8 @@ export interface AchievementDef {
   condition: (ctx: AchievementContext) => boolean;
   /** IDs of achievements that become available after this one is unlocked */
   next?: string[];
-  /** optional method for manually unlocking this achievement */
-  unlock?: (ctx: AchievementContext) => void;
+  /** Spend resources from inventory to unlock this achievement manually */
+  manualUnlockResourceSpent?: () => Record<string, number>;
 }
 
 /** The starting achievement - unlocked by default */
@@ -69,9 +71,9 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     description: "Unlock me. Or don't.",
     condition: () => false,
     next: [],
-    unlock: (ctx) => {
+    manualUnlockResourceSpent: () => {
       // This achievement has no further requirements for unlocking manually
-      return null
+      return {}
     }
   },
   {
@@ -79,14 +81,20 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "First Roll",
     description: "Roll the dice for the first time",
     condition: ({ stats }) => stats.totalRolls >= 1,
-    next: ["ten-rolls", "sum-100"],
+    next: ["five-rolls", "ten-rolls", "sum-100"],
   },
   {
+    id: "five-rolls",
+    name: "That's how they get you",
+    description: "Roll 5 times",
+    condition: ({ stats }) => stats.totalRolls >= 5,
+    next: [],
+  },{
     id: "ten-rolls",
     name: "Getting Started",
     description: "Roll 10 times",
     condition: ({ stats }) => stats.totalRolls >= 10,
-    next: ["fifty-rolls", "reach-1"],
+    next: ["fifty-rolls", "reach-1", "corners-1", "bullseye-1"],
   },
   {
     id: "fifty-rolls",
@@ -198,6 +206,31 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     description: "Or something close, pretty unlikely to roll three consecutive 100s",
     condition: ({ stats }) => stats.recentRolls.length >= 3 && stats.recentRolls.every(r => r === 100),
     next: []
+  },
+  {
+    id: "corners-1",
+    name: "Stability",
+    description: "No need to be on edge. Everything will eventually settle,",
+    condition: ({ }) => false,
+    next: ["corners-100", "corners-2"],
+    manualUnlockResourceSpent: () => {
+      // This achievement needs 400 inventory rolls to unlock
+      return  {rolls: 400};
+    }
+  },
+  {
+    id: "corners-2",
+    name: "Spread",
+    description: `Give me enough shoulders to rest on, and no lever will be big
+    enough to tip me over.`,
+    condition: ({ }) => false,
+    next: ["corners-3"],
+    manualUnlockResourceSpent: () => {
+      // This achievement needs 400 inventory rolls to unlock
+      return  {rolls: 400, 
+        [MODIFIER_THEME_COLORS.corners]: 100,
+      };
+    }
   },
 ];
 
