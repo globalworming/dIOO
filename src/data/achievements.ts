@@ -90,8 +90,16 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "That's how they get you",
     description: "Roll 5 times",
     condition: ({ stats }) => stats.totalRolls >= 5,
+    next: ["inventory-1"],
+  },
+  {
+    id: "inventory-1",
+    name: "Numbers go up",
+    description: "Seize the means of accumulation",
+    condition: () => false,
     next: [],
-  },{
+  },
+  {
     id: "ten-rolls",
     name: "Getting Started",
     description: "Roll 10 times",

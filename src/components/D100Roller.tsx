@@ -166,6 +166,8 @@ export const D100Roller = () => {
           modifiedResult={modifiedResult}
           modifierBonuses={modifierBonuses}
           inventory={stats.inventory}
+          onUnlockInventory={() => unlockAchievement("inventory-1")}
+          showInventoryHint={unlockedDefs.some(d => d.id === "ten-rolls") && !unlockedDefs.some(d => d.id === "inventory-1")}
         />
         <div className="relative">
           <DiceGrid 

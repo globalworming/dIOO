@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ModifierBonus } from "./ModifierPanel";
+import { useState } from "react";
+import { Hint } from "./Hint";
 
 interface ResultDisplayProps {
   result: number | null;
@@ -11,38 +13,59 @@ interface ResultDisplayProps {
     colors: Record<string, number>;
     rolls: number;
   };
+  onUnlockInventory?: () => void;
+  showInventoryHint?: boolean;
 }
 
 const INVENTORY_CAP = 1000;
 
-export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses = [], inventory }: ResultDisplayProps) => {
+export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses = [], inventory, onUnlockInventory, showInventoryHint }: ResultDisplayProps) => {
+  const [showInventory, setShowInventory] = useState(false);
   const showModified = modifierBonuses.length > 0 && result !== null;
   const displayValue = showModified ? modifiedResult : result;
 
   // Get all colors from inventory for progress bars
   const colorEntries = inventory ? Object.entries(inventory.colors) : [];
   
+  const hasInventory = colorEntries.length > 0 || (inventory?.rolls ?? 0) > 0;
+
+  const handleClick = () => {
+    setShowInventory(!showInventory);
+    if (onUnlockInventory) {
+      onUnlockInventory();
+    }
+  };
+
   return (
     <div 
-      className="text-center relative"
+      className={cn("text-center relative", hasInventory && "z-20 cursor-pointer")}
       aria-label={displayValue !== null ? `Result: ${displayValue}` : "Result display"}
+      onClick={handleClick}
     >
+      {showInventoryHint && hasInventory && (
+        <Hint position="center">click to show inventory</Hint>
+      )}
       {/* Inventory progress bars behind result - vertical, full height */}
-      {inventory && (colorEntries.length > 0 || (inventory ? (inventory.rolls / INVENTORY_CAP) * 100 : 0) > 0) && (
-        <div className="absolute inset-0 flex justify-center items-end gap-2 -z-10">
+      {hasInventory && (
+        <div className={cn("absolute inset-0 flex justify-center items-end gap-2", showInventory ? "z-20" : "-z-10")}>
           {/* Rolls progress bar */}
-          <div className="w-10 h-full rounded-b-full overflow-hidden flex flex-col justify-end">
+          <div className="w-10 h-full rounded-b-full overflow-hidden flex flex-col justify-end relative">
             <div 
-              className="w-full transition-all duration-500 bg-white/60"
+              className="w-full transition-all duration-500 bg-white"
               style={{ 
                 height: `${inventory ? (inventory.rolls / INVENTORY_CAP) * 100 : 0}%`,
                 boxShadow: 'inset 0px -6px 10px rgba(0, 0, 0, 1), inset -6px 6px 10px rgba(255, 255, 255, 0.5)',
               }}
             />
+            {showInventory && (
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-background/60 text-white px-3 font-mono pointer-events-none">
+                {inventory.rolls}
+              </div>
+            )}
           </div>
           {/* Color progress bars */}
           {colorEntries.map(([color, amount]) => (
-            <div key={color} className="w-10 h-full rounded-b-full overflow-hidden flex flex-col justify-end">
+            <div key={color} className="w-10 h-full rounded-b-full overflow-hidden flex flex-col justify-end relative">
               <div 
                 className="w-full transition-all duration-500"
                 style={{ 
@@ -51,6 +74,11 @@ export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses =
                   boxShadow: 'inset 0 -6px 10px rgba(0, 0, 0, 1), inset -6px 6px 10px rgba(255, 255, 255, 0.5)',
                 }}
               />
+              {showInventory && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-background/60 text-white px-3 font-mono pointer-events-none">
+                  {amount}
+                </div>
+              )}
             </div>
           ))}
         </div>
