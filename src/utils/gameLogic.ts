@@ -5,15 +5,17 @@ import { toast } from "sonner";
 
 /**
  * Build a sorted colors array for skill pattern matching.
- * Sorts empty cells first, then dots. Each cell contains its color (or undefined for empty).
+ * Sorts empty cells first, then dots. Keystones stay at their original positions.
  * 
  * @param items - 100-element boolean array (original grid order)
  * @param activeModifiers - Active modifiers for color lookup
+ * @param keystones - Set of indices that are keystones (stay in place)
  * @returns 100-element array in sorted order: undefined for empty cells, color string for dots
  */
 export const buildSortedColors = (
   items: boolean[],
-  activeModifiers: Modifier[]
+  activeModifiers: Modifier[],
+  keystones: Set<number> = new Set()
 ): (string | undefined)[] => {
   // Pre-build color map for O(1) lookups
   const colorMap = buildModifierColorMap(activeModifiers);
@@ -25,14 +27,36 @@ export const buildSortedColors = (
     color: hasDot ? (colorMap[originalIndex] ?? "default") : undefined,
   }));
 
-  // Sort: empty cells first, then dots (same logic as DiceGrid)
-  cells.sort((a, b) => {
+  // Separate keystones from non-keystones
+  const keystoneCells = cells.filter(c => keystones.has(c.originalIndex));
+  const nonKeystoneCells = cells.filter(c => !keystones.has(c.originalIndex));
+
+  // Sort non-keystones: empty cells first, then dots
+  nonKeystoneCells.sort((a, b) => {
     if (a.hasDot === b.hasDot) return a.originalIndex - b.originalIndex;
     return a.hasDot ? 1 : -1;
   });
 
-  // Return just the colors in sorted order
-  return cells.map(c => c.color);
+  // Build result array with keystones at their original positions
+  const result: (string | undefined)[] = new Array(100);
+  
+  // Place keystones at their original positions
+  for (const cell of keystoneCells) {
+    result[cell.originalIndex] = cell.color;
+  }
+  
+  // Fill remaining positions with sorted non-keystones
+  let nonKeystoneIdx = 0;
+  for (let pos = 0; pos < 100; pos++) {
+    if (!keystones.has(pos)) {
+      if (nonKeystoneIdx < nonKeystoneCells.length) {
+        result[pos] = nonKeystoneCells[nonKeystoneIdx].color;
+        nonKeystoneIdx++;
+      }
+    }
+  }
+
+  return result;
 };
 
 /**

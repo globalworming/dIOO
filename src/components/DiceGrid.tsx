@@ -11,9 +11,15 @@ interface DiceGridProps {
   modifiedResult?: number | null;
   /** Indices consumed by skill pattern matching (in sorted grid order) */
   consumedIndices?: Set<number>;
+  /** Indices that are keystones */
+  keystones?: Set<number>;
+  /** Whether we're in keystone edit mode */
+  keystoneEditMode?: boolean;
+  /** Callback to toggle a keystone */
+  onToggleKeystone?: (index: number) => void;
 }
 
-export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifiedResult, consumedIndices = new Set() }: DiceGridProps) => {
+export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifiedResult, consumedIndices = new Set(), keystones = new Set(), keystoneEditMode = false, onToggleKeystone }: DiceGridProps) => {
   const displayResult = modifiedResult ?? result;
   // Calculate intensity based on result (0-1 scale)
   const intensity = displayResult ? displayResult / 100 : 0;
@@ -56,20 +62,50 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
    * then cells with dots appear last (bottom-right). This creates a "sweep" effect
    * where dots visually collect at the end of the grid.
    * 
+   * Keystones always stay at their original position (sortedPosition = originalIndex).
+   * 
    * Each item gets a sortedPosition which is used as CSS `order` property.
    * The sortedPosition also controls animation delay for staggered transitions.
    */
-  const sortedIndices = items
-    .map((hasDot, originalIndex) => ({ hasDot, originalIndex }))
-    .sort((a, b) => {
-      // Empty cells first, then cells with dots; preserve original order within each group
+  const sortedIndices = useMemo(() => {
+    // First, reserve positions for keystones (they stay in place)
+    const reservedPositions = new Set(keystones);
+    
+    // Separate non-keystone items
+    const nonKeystoneItems = items
+      .map((hasDot, originalIndex) => ({ hasDot, originalIndex }))
+      .filter(item => !keystones.has(item.originalIndex));
+    
+    // Sort non-keystones: empty first, then dots
+    nonKeystoneItems.sort((a, b) => {
       if (a.hasDot === b.hasDot) return a.originalIndex - b.originalIndex;
       return a.hasDot ? 1 : -1;
-    })
-    .map((item, sortedPosition) => ({
-      originalIndex: item.originalIndex,
-      sortedPosition,
-    }));
+    });
+    
+    // Build final position mapping
+    const result: { originalIndex: number; sortedPosition: number }[] = [];
+    
+    // Add keystones at their original positions
+    keystones.forEach(idx => {
+      result.push({ originalIndex: idx, sortedPosition: idx });
+    });
+    
+    // Assign remaining positions to non-keystones
+    let nonKeystoneIdx = 0;
+    for (let pos = 0; pos < 100; pos++) {
+      if (!reservedPositions.has(pos)) {
+        if (nonKeystoneIdx < nonKeystoneItems.length) {
+          result.push({
+            originalIndex: nonKeystoneItems[nonKeystoneIdx].originalIndex,
+            sortedPosition: pos,
+          });
+          nonKeystoneIdx++;
+        }
+      }
+    }
+    
+    return result;
+  }, [items, keystones]);
 
   /** Get the sorted position for a cell at the given original grid index */
   const getSortedIndex = (originalIndex: number) => {
@@ -146,7 +182,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
             "--shuffle-r": `${shuffleR}deg`,
           } as React.CSSProperties}
         />
-        <div className={`grid grid-cols-10 gap-1 sm:gap-1.5 relative ${phase === "random" ? "animate-shuffle" : ""}`}
+        <div className={`grid grid-cols-10 gap-1 sm:gap-1.5 relative ${phase === "random" && !keystoneEditMode ? "animate-shuffle" : ""}`}
           style={{
             "--shuffle-x": `${shuffleX * 0.2}px`,
             "--shuffle-y": `${shuffleY * 0.2}px`,
@@ -157,13 +193,16 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
           {items.map((hasDot, index) => (
             <DiceItem
               key={index}
-              hasDot={hasDot}
+              hasDot={keystoneEditMode ? false : hasDot}
               index={index}
-              phase={phase === "idle" ? "sorted" : phase}
-              sortedIndex={getSortedIndex(index)}
-              highlighted={highlightedZones.has(index)}
+              phase={keystoneEditMode ? "random" : (phase === "idle" ? "sorted" : phase)}
+              sortedIndex={keystoneEditMode ? index : getSortedIndex(index)}
+              highlighted={!keystoneEditMode && highlightedZones.has(index)}
               modifierColor={colorMap[index]}
-              consumed={visibleConsumed.has(getSortedIndex(index))}
+              consumed={!keystoneEditMode && visibleConsumed.has(getSortedIndex(index))}
+              isKeystone={keystones.has(index)}
+              keystoneEditMode={keystoneEditMode}
+              onClick={keystoneEditMode ? () => onToggleKeystone?.(index) : undefined}
             />
           ))}
         </div>

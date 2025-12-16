@@ -51,7 +51,7 @@ export const ResultDisplay = ({ result, phase, modifiedResult, modifierBonuses =
           {/* Rolls progress bar */}
           <div className="w-10 h-full rounded-b-full overflow-hidden flex flex-col justify-end relative">
             <div 
-              className="w-full transition-all duration-500 bg-white"
+              className="w-full transition-all duration-500 bg-muted-foreground"
               style={{ 
                 height: `${inventory ? (inventory.rolls / INVENTORY_CAP) * 100 : 0}%`,
                 boxShadow: 'inset 0px -6px 10px rgba(0, 0, 0, 1), inset -6px 6px 10px rgba(255, 255, 255, 0.5)',
