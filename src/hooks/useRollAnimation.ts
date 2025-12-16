@@ -15,18 +15,12 @@ import { calculateModifierBonuses, calculateSkillBonuses, handleAchievements, ag
 export type Phase = "idle" | "random" | "sorting" | "sorted" | "modifying" | "skilling";
 
 /** Generate items with exactly `count` dots randomly distributed using Fisher-Yates shuffle */
-const generateItemsWithDots = (count: number, keystones: Set<number> = new Set()): boolean[] => {
+const generateItemsWithDots = (count: number): boolean[] => {
   const items = Array.from({ length: 100 }, (_, i) => i < count);
   for (let i = items.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [items[i], items[j]] = [items[j], items[i]];
   }
-  // Ensure keystones are always enabled (have dots)
-  keystones.forEach(idx => {
-    if (idx >= 0 && idx < 100) {
-      items[idx] = true;
-    }
-  });
   return items;
 };
 
@@ -45,8 +39,6 @@ interface UseRollAnimationOptions {
   skills: Skill[];
   recordRoll: (result: number, finalResult: number, hasModifiers: boolean, bonuses?: ModifierBonus[]) => string[];
   onSkillsTriggered?: (triggeredIds: Set<string>) => void;
-  /** Indices that are keystones - always enabled and sort to original position */
-  keystones?: Set<number>;
 }
 
 interface UseRollAnimationReturn {
@@ -80,7 +72,6 @@ export const useRollAnimation = ({
   skills,
   recordRoll,
   onSkillsTriggered,
-  keystones = new Set(),
 }: UseRollAnimationOptions): UseRollAnimationReturn => {
   const [items, setItems] = useState<boolean[]>(() => generateItemsWithDots(0));
   const [phase, setPhase] = useState<Phase>("idle");
@@ -126,9 +117,8 @@ export const useRollAnimation = ({
         clearInterval(animationRef.current.interval!);
         
         // Phase 2: Generate final items and start sorting
-        // Keystones are always enabled in the final items
-        const finalItems = generateItemsWithDots(rolledResult, keystones);
-        setItems(finalItems);        
+        const finalItems = generateItemsWithDots(rolledResult);
+        setItems(finalItems);
         setPhase("sorting");
 
         // Phase 3: Complete sorting - duration inversely proportional to result
@@ -154,7 +144,7 @@ export const useRollAnimation = ({
 
                 const skillTimeout = setTimeout(() => {
                   const activeMods = modifiers.filter(m => m.active);
-                  const sortedColors = buildSortedColors(finalItems, activeMods, keystones);
+                  const sortedColors = buildSortedColors(finalItems, activeMods);
                   const { skillBonuses, totalSkillBonus, triggeredSkills, consumedIndices: consumed } = calculateSkillBonuses(
                     sortedColors,
                     skills
@@ -191,7 +181,7 @@ export const useRollAnimation = ({
         animationRef.current.timeouts.push(sortTimeout);
       }
     }, 140);
-  }, [phase, hasActiveModifiers, modifiers, skills, recordRoll, onSkillsTriggered, keystones]);
+  }, [phase, hasActiveModifiers, modifiers, skills, recordRoll, onSkillsTriggered]);
 
   const roll = useCallback(() => executeRoll(), [executeRoll]);
   const debugRoll = useCallback((naturalRoll: number) => executeRoll(naturalRoll), [executeRoll]);

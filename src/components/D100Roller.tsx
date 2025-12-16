@@ -13,10 +13,6 @@ import { useAchievements } from "@/hooks/useAchievements";
 import { useRollAnimation } from "@/hooks/useRollAnimation";
 import type { AchievementDef } from "@/data/achievements";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
-import { Button } from "./ui/button";
-import { Locate } from "lucide-react";
-
-const MAX_KEYSTONES = 10;
 
 export const D100Roller = () => {
   const { stats, recordRoll, resetGame, setTotalRolls, addInventoryResources, unlockAchievement, unlockedDefs, unlockedDefsSorted, availableDefs, totalAchievementCount, latestUnlockedDef } = useAchievements();
@@ -67,22 +63,6 @@ export const D100Roller = () => {
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementDef | null>(null);
   const { clearVersion } = useVersionCheck();
-  
-  // Keystones: indices that always stay in place and are enabled
-  const [keystones, setKeystones] = useState<Set<number>>(new Set());
-  const [keystoneEditMode, setKeystoneEditMode] = useState(false);
-  
-  const toggleKeystone = useCallback((index: number) => {
-    setKeystones(prev => {
-      const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
-      } else if (next.size < MAX_KEYSTONES) {
-        next.add(index);
-      }
-      return next;
-    });
-  }, []);
 
   // Reset all progress including modifiers and skills
   const handleResetGame = useCallback(() => {
@@ -119,7 +99,6 @@ export const D100Roller = () => {
     skills,
     recordRoll,
     onSkillsTriggered: handleSkillsTriggered,
-    keystones,
   });
 
   const handleSlotsChange = useCallback((newSlots: SlotState[]) => {
@@ -193,15 +172,12 @@ export const D100Roller = () => {
         <div className="relative">
           <DiceGrid 
             items={items} 
-            phase={keystoneEditMode ? "idle" : phase} 
-            onClick={keystoneEditMode ? undefined : roll} 
+            phase={phase} 
+            onClick={roll} 
             result={result}
             modifiers={modifiers}
             modifiedResult={modifiedResult}
             consumedIndices={consumedIndices}
-            keystones={keystones}
-            keystoneEditMode={keystoneEditMode}
-            onToggleKeystone={toggleKeystone}
           />
           {!unlockedDefs.some(d => d.id === "start") && (
             <Hint position="center">press grid to play</Hint>
@@ -237,15 +213,6 @@ export const D100Roller = () => {
           )}
           {/* Controls row: fullscreen and achievements */}
           <div className="flex justify-center gap-2">
-            <Button
-              variant={keystoneEditMode ? "default" : "ghost"}
-              className="w-14 h-14"
-              onClick={() => setKeystoneEditMode(!keystoneEditMode)}
-              disabled={isRolling}
-              title={`Set keystones (${keystones.size}/${MAX_KEYSTONES})`}
-            >
-              <Locate className="w-5 h-5" />
-            </Button>
             <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
             <div className="relative">
               <AchievementButton
