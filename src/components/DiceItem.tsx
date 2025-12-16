@@ -10,9 +10,13 @@ interface DiceItemProps {
   modifierColor?: string;
   /** Whether this cell was consumed by a skill pattern match */
   consumed?: boolean;
+  /** Whether this cell is a keystone */
+  isKeystone?: boolean;
+  /** Callback for clicking in edit mode */
+  onClick?: () => void;
 }
 
-export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modifierColor, consumed }: DiceItemProps) => {
+export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modifierColor, consumed, isKeystone, onClick }: DiceItemProps) => {
   return (
     <div
       className={cn(
@@ -22,13 +26,16 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
         phase === "sorting" ? "duration-700" : "",
         highlighted && hasDot && "",
         highlighted && !hasDot && "bg-background/100",
-        consumed && "rounded-full [scale:0.3]"
+        consumed && "rounded-full [scale:0.3]",
+        onClick && "cursor-pointer hover:bg-secondary/80"
       )}
       style={{
         borderColor: modifierColor,
         transitionDelay: phase === "sorting" ? `${sortedIndex * 8}ms` : "0ms",
         order: phase === "sorted" || phase === "sorting" || phase === "modifying" || phase === "skilling" ? sortedIndex : index,
+        background: isKeystone ? "linear-gradient(10deg, transparent 20%, rgba(128, 128, 128, 0.4) 100%)" : undefined,
       } as React.CSSProperties}
+      onClick={onClick}
     >
       {hasDot && (
         <div

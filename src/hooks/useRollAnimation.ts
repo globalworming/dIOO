@@ -15,12 +15,18 @@ import { calculateModifierBonuses, calculateSkillBonuses, handleAchievements, ag
 export type Phase = "idle" | "random" | "sorting" | "sorted" | "modifying" | "skilling";
 
 /** Generate items with exactly `count` dots randomly distributed using Fisher-Yates shuffle */
-const generateItemsWithDots = (count: number): boolean[] => {
+const generateItemsWithDots = (count: number, keystones: Set<number> = new Set()): boolean[] => {
   const items = Array.from({ length: 100 }, (_, i) => i < count);
   for (let i = items.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [items[i], items[j]] = [items[j], items[i]];
   }
+  // Ensure keystones always have dots
+  keystones.forEach(idx => {
+    if (idx >= 0 && idx < 100) {
+      items[idx] = true;
+    }
+  });
   return items;
 };
 
@@ -39,6 +45,10 @@ interface UseRollAnimationOptions {
   skills: Skill[];
   recordRoll: (result: number, finalResult: number, hasModifiers: boolean, bonuses?: ModifierBonus[]) => string[];
   onSkillsTriggered?: (triggeredIds: Set<string>) => void;
+  /** Indices that are keystones - always have dots */
+  keystones?: Set<number>;
+  /** Called on first roll with keystones set */
+  onFirstKeystoneRoll?: () => void;
 }
 
 interface UseRollAnimationReturn {
@@ -72,6 +82,8 @@ export const useRollAnimation = ({
   skills,
   recordRoll,
   onSkillsTriggered,
+  keystones = new Set(),
+  onFirstKeystoneRoll,
 }: UseRollAnimationOptions): UseRollAnimationReturn => {
   const [items, setItems] = useState<boolean[]>(() => generateItemsWithDots(0));
   const [phase, setPhase] = useState<Phase>("idle");
@@ -117,8 +129,14 @@ export const useRollAnimation = ({
         clearInterval(animationRef.current.interval!);
         
         // Phase 2: Generate final items and start sorting
-        const finalItems = generateItemsWithDots(rolledResult);
+        // Keystones always have dots
+        const finalItems = generateItemsWithDots(rolledResult, keystones);
         setItems(finalItems);
+        
+        // Trigger first keystone roll achievement
+        if (keystones.size > 0 && onFirstKeystoneRoll) {
+          onFirstKeystoneRoll();
+        }
         setPhase("sorting");
 
         // Phase 3: Complete sorting - duration inversely proportional to result
@@ -181,7 +199,7 @@ export const useRollAnimation = ({
         animationRef.current.timeouts.push(sortTimeout);
       }
     }, 140);
-  }, [phase, hasActiveModifiers, modifiers, skills, recordRoll, onSkillsTriggered]);
+  }, [phase, hasActiveModifiers, modifiers, skills, recordRoll, onSkillsTriggered, keystones, onFirstKeystoneRoll]);
 
   const roll = useCallback(() => executeRoll(), [executeRoll]);
   const debugRoll = useCallback((naturalRoll: number) => executeRoll(naturalRoll), [executeRoll]);

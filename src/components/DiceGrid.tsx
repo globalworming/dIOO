@@ -11,9 +11,15 @@ interface DiceGridProps {
   modifiedResult?: number | null;
   /** Indices consumed by skill pattern matching (in sorted grid order) */
   consumedIndices?: Set<number>;
+  /** Indices that are keystones */
+  keystones?: Set<number>;
+  /** Whether we're in keystone edit mode */
+  keystoneEditMode?: boolean;
+  /** Callback to toggle a keystone */
+  onToggleKeystone?: (index: number) => void;
 }
 
-export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifiedResult, consumedIndices = new Set() }: DiceGridProps) => {
+export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifiedResult, consumedIndices = new Set(), keystones = new Set(), keystoneEditMode = false, onToggleKeystone }: DiceGridProps) => {
   const displayResult = modifiedResult ?? result;
   // Calculate intensity based on result (0-1 scale)
   const intensity = displayResult ? displayResult / 100 : 0;
@@ -131,7 +137,7 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
         transition-scale ease-in-out duration-100 ${cssScale}
         `}
         style={gridGlowStyle}
-        onClick={onClick && (phase === "idle" || phase === "sorted") ? onClick : undefined}
+        onClick={!keystoneEditMode && onClick && (phase === "idle" || phase === "sorted") ? onClick : undefined}
       >
         {/* Crosshair overlay */}
         <div
@@ -157,13 +163,15 @@ export const DiceGrid = ({ items, phase, onClick, result, modifiers = [], modifi
           {items.map((hasDot, index) => (
             <DiceItem
               key={index}
-              hasDot={hasDot}
+              hasDot={hasDot || keystones.has(index)}
               index={index}
               phase={phase === "idle" ? "sorted" : phase}
               sortedIndex={getSortedIndex(index)}
               highlighted={highlightedZones.has(index)}
               modifierColor={colorMap[index]}
               consumed={visibleConsumed.has(getSortedIndex(index))}
+              isKeystone={keystoneEditMode && keystones.has(index)}
+              onClick={keystoneEditMode ? () => onToggleKeystone?.(index) : undefined}
             />
           ))}
         </div>

@@ -13,6 +13,11 @@ import { useAchievements } from "@/hooks/useAchievements";
 import { useRollAnimation } from "@/hooks/useRollAnimation";
 import type { AchievementDef } from "@/data/achievements";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
+import { Button } from "./ui/button";
+import { BrickWall } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const MAX_KEYSTONES = 10;
 
 export const D100Roller = () => {
   const { stats, recordRoll, resetGame, setTotalRolls, addInventoryResources, unlockAchievement, unlockedDefs, unlockedDefsSorted, availableDefs, totalAchievementCount, latestUnlockedDef } = useAchievements();
@@ -63,6 +68,22 @@ export const D100Roller = () => {
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementDef | null>(null);
   const { clearVersion } = useVersionCheck();
+  
+  // Keystones: indices that always have dots
+  const [keystones, setKeystones] = useState<Set<number>>(new Set());
+  const [keystoneEditMode, setKeystoneEditMode] = useState(false);
+  
+  const toggleKeystone = useCallback((index: number) => {
+    setKeystones(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else if (next.size < MAX_KEYSTONES) {
+        next.add(index);
+      }
+      return next;
+    });
+  }, []);
 
   // Reset all progress including modifiers and skills
   const handleResetGame = useCallback(() => {
@@ -99,6 +120,12 @@ export const D100Roller = () => {
     skills,
     recordRoll,
     onSkillsTriggered: handleSkillsTriggered,
+    keystones,
+    onFirstKeystoneRoll: () => {
+      if (!unlockedDefs.some(d => d.id === "first-keystone")) {
+        unlockAchievement("first-keystone");
+      }
+    },
   });
 
   const handleSlotsChange = useCallback((newSlots: SlotState[]) => {
@@ -178,6 +205,9 @@ export const D100Roller = () => {
             modifiers={modifiers}
             modifiedResult={modifiedResult}
             consumedIndices={consumedIndices}
+            keystones={keystones}
+            keystoneEditMode={keystoneEditMode}
+            onToggleKeystone={toggleKeystone}
           />
           {!unlockedDefs.some(d => d.id === "start") && (
             <Hint position="center">press grid to play</Hint>
@@ -202,13 +232,36 @@ export const D100Roller = () => {
             </div>
           )}
           {/* Skills panel - unlocked after fifty-rolls */}
-          {unlockedDefs.some(d => d.id === "fifty-rolls") && (
+          { false && unlockedDefs.some(d => d.id === "fifty-rolls") && (
             <div className="flex justify-center">
               <SkillsPanel 
                 skills={skills} 
                 onToggle={toggleSkill}
                 disabled={isRolling}
               />
+            </div>
+          )}
+          {/* Keystone toggle - unlocked after fifty-rolls */}
+          {unlockedDefs.some(d => d.id === "fifty-rolls") && (
+            <div className="relative flex justify-center">
+              <Button
+                size="icon"
+                variant="ghost"
+                className={cn("px-8", "hover:text-primary hover:bg-background",
+                  "border-2", 
+                  keystoneEditMode ? "border-primary" : "border-muted"
+                )}
+                onClick={() => setKeystoneEditMode(!keystoneEditMode)}
+                disabled={isRolling}
+                title={`Set keystones (${keystones.size}/${MAX_KEYSTONES})`}
+                style={keystoneEditMode ? undefined : undefined}
+              >
+                <BrickWall/>
+                {keystones.size}/{MAX_KEYSTONES}
+              </Button>
+              {!unlockedDefs.some(d => d.id === "first-keystone") && (
+                <Hint>{keystoneEditMode ? "click on the grid, then toggle again" : "set keystones, then roll"}</Hint>
+              )}
             </div>
           )}
           {/* Controls row: fullscreen and achievements */}

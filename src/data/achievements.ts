@@ -111,7 +111,14 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "Dedicated Roller",
     description: "Roll 50 times",
     condition: ({ stats }) => stats.totalRolls >= 50,
-    next: ["hundred-rolls"],
+    next: ["hundred-rolls", "first-keystone"],
+  },
+  {
+    id: "first-keystone",
+    name: "First Keystone",
+    description: "Punching rocks, punching rocks, punching rocks, ...",
+    condition: () => false,
+    next: [],
   },
   {
     id: "hundred-rolls",

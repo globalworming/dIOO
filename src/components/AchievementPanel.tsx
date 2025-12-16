@@ -136,25 +136,38 @@ export const AchievementPanel = ({
                 <div className="text-xs text-muted-foreground mb-2">Available to unlock</div>
                 <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
                   {availableDefs.map((def) => (
-                    <button
-                      key={def.id}
-                      onClick={() => setSelectedAchievement({ def, unlocked: false })}
-                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg border hover:bg-secondary/70 transition-colors text-left`}
-                    >
-                      <div className={cn(
-                        `w-8 h-8 rounded-full flex items-center justify-center shrink-0`,
-                        def.manualUnlockResourceSpent ? 'ring-1 ring-amber-500' : '')}>
-                        {def.manualUnlockResourceSpent ? (
-                          <Sparkles className="w-4 h-4 text-amber-500" />
-                        ) : (
-                          <Lock className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-base font-medium truncate">{def.name}</div>
-                        <div className="text-sm text-muted-foreground truncate">{def.description}</div>
-                      </div>
-                    </button>
+                    <div key={def.id} className="relative">
+                      <button
+                        onClick={() => setSelectedAchievement({ def, unlocked: false })}
+                        className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg border hover:bg-secondary/70 transition-colors text-left`}
+                      >
+                        <div className={cn(
+                          `w-8 h-8 rounded-full flex items-center justify-center shrink-0`,
+                          def.manualUnlockResourceSpent ? 'ring-1 ring-amber-500' : '')}>
+                          {def.manualUnlockResourceSpent ? (
+                            <Sparkles className="w-4 h-4 text-amber-500" />
+                          ) : (
+                            <Lock className="w-4 h-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-base font-medium truncate">{def.name}</div>
+                          <div className="text-sm text-muted-foreground truncate">{def.description}</div>
+                        </div>
+                      </button>
+                      {showDebug && onUnlockAchievement && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onUnlockAchievement(def.id);
+                          }}
+                          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-yellow-500 hover:bg-yellow-400 flex items-center justify-center transition-colors"
+                          title={`Unlock ${def.name}`}
+                        >
+                          <Lock className="w-3 h-3 text-black" />
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
