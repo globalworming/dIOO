@@ -24,7 +24,17 @@ export const D100Roller = () => {
     return ALL_MODIFIERS.filter(modifier => {      
       // Corners progression: corners2 when corners-1 unlocked, corners3 when corners-2 unlocked
       if (modifier.id === 'corners2' && unlockedIds.has('corners-1')) return true;
-      if (modifier.id === 'corners3' && unlockedIds.has('corners-2')) return true;
+      if (modifier.id === 'corners1' && unlockedIds.has('corners-2')) return true;
+      // bullseye progression: bullseye2 when bullseye-1 unlocked, bullseye3 when bullseye-2 unlocked
+      if (modifier.id === 'bullseye1' && unlockedIds.has('bullseye-1')) return true;
+      if (modifier.id === 'bullseye2' && unlockedIds.has('bullseye-2')) return true;
+      // Waves progression: waves2 when waves-1 unlocked, waves3 when waves-2 unlocked
+      if (modifier.id === 'waves3' && unlockedIds.has('waves-1')) return true;
+      if (modifier.id === 'waves1' && unlockedIds.has('waves-2')) return true;
+      if (modifier.id === 'waves5' && unlockedIds.has('waves-3')) return true;
+      // Diagonal progression: diagonal2 when diagonal-1 unlocked, diagonal3 when diagonal-2 unlocked
+      if (modifier.id === 'diagonals1' && unlockedIds.has('diagonals-1')) return true;
+      if (modifier.id === 'diagonals2' && unlockedIds.has('diagonals-2')) return true;
       
       return false;
     });
@@ -33,6 +43,22 @@ export const D100Roller = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [achievementPanelOpen, setAchievementPanelOpen] = useState(false);
   const [slots, setSlots] = useState<SlotState[]>(DEFAULT_SLOTS);
+
+  // Sync slots with maxSlots
+  useEffect(() => {
+    setSlots(current => {
+      if (current.length === stats.maxSlots) return current;
+      if (current.length < stats.maxSlots) {
+        return [
+          ...current,
+          ...Array(stats.maxSlots - current.length).fill({ modifierId: null, active: false })
+        ];
+      } else {
+        return current.slice(0, stats.maxSlots);
+      }
+    });
+  }, [stats.maxSlots]);
+
   const modifiers = slotsToModifiers(slots, availableModifiers);
   const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementDef | null>(null);
@@ -166,6 +192,7 @@ export const D100Roller = () => {
                 allModifiers={availableModifiers}
                 onSlotsChange={handleSlotsChange}
                 disabled={isRolling}
+                maxSlots={stats.maxSlots}
               />
               {unlockedDefs.some(d => d.id === "ten-rolls") && !unlockedDefs.some(d => d.id === "first-mod") && availableModifiers.length > 0 && (
                 <Hint>set patterns, click to toggle</Hint>

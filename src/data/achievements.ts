@@ -7,6 +7,8 @@ export interface GameStats {
   totalRolls: number;
   totalModifiedRolls: number;
   colorTotals: Record<string, number>;
+  /** Number of available modifier slots */
+  maxSlots: number;
   /** Track which natural numbers (1-100) have been rolled */
   rolledNumbers: Set<number>;
   /** Track last 3 natural rolls for consecutive roll achievements */
@@ -94,7 +96,7 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "Getting Started",
     description: "Roll 10 times",
     condition: ({ stats }) => stats.totalRolls >= 10,
-    next: ["fifty-rolls", "reach-1", "corners-1", "bullseye-1"],
+    next: ["fifty-rolls", "reach-1", "corners-1", "bullseye-1", "diagonals-1", "waves-1"],
   },
   {
     id: "fifty-rolls",
@@ -214,7 +216,6 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     condition: ({ }) => false,
     next: ["corners-100", "corners-2"],
     manualUnlockResourceSpent: () => {
-      // This achievement needs 400 inventory rolls to unlock
       return  {rolls: 400};
     }
   },
@@ -226,9 +227,65 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     condition: ({ }) => false,
     next: ["corners-3"],
     manualUnlockResourceSpent: () => {
-      // This achievement needs 400 inventory rolls to unlock
       return  {rolls: 400, 
         [MODIFIER_THEME_COLORS.corners]: 100,
+      };
+    }
+  },
+  {
+    id: "bullseye-1",
+    name: "Mediocrity",
+    description: "There is safety in numbers",
+    condition: ({ }) => false,
+    next: ["bullseye-2"],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400, 
+      };
+    }
+  },
+  {
+    id: "diagonals-1",
+    name: "Righteousness",
+    description: "Do not sway",
+    condition: ({ }) => false,
+    next: ["diagonals-2"],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400, 
+      };
+    }
+  },
+  {
+    id: "diagonals-2",
+    name: "Righteousness",
+    description: "We are legion",
+    condition: ({ }) => false,
+    next: ["diagonals-3"],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400,
+        [MODIFIER_THEME_COLORS.diagonals]: 100, 
+      };
+    }
+  },
+  {
+    id: "waves-1",
+    name: "Sustainability",
+    description: "What goes up must come down",
+    condition: ({ }) => false,
+    next: ["waves-2"],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400, 
+      };
+    }
+  },
+  {
+    id: "waves-2",
+    name: "Sustainability",
+    description: "Bring balance",
+    condition: ({ }) => false,
+    next: ["waves-3"],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400,
+        [MODIFIER_THEME_COLORS.waves]: 100, 
       };
     }
   },

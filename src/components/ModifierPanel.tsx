@@ -65,9 +65,10 @@ interface ModifierPanelProps {
   allModifiers: ModifierDef[];
   onSlotsChange: (slots: SlotState[]) => void;
   disabled?: boolean;
+  maxSlots: number;
 }
 
-export const ModifierPanel = ({ slots, allModifiers, onSlotsChange, disabled }: ModifierPanelProps) => {
+export const ModifierPanel = ({ slots, allModifiers, onSlotsChange, disabled, maxSlots }: ModifierPanelProps) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   // Toggle slot active state
@@ -93,9 +94,9 @@ export const ModifierPanel = ({ slots, allModifiers, onSlotsChange, disabled }: 
       );
       onSlotsChange(newSlots);
     } else {
-      // Add to first empty slot (if under 4)
+      // Add to first empty slot
       const emptyIndex = slots.findIndex(s => !s.modifierId);
-      if (emptyIndex !== -1) {
+      if (emptyIndex !== -1 && selectedCount < maxSlots) {
         const newSlots = [...slots];
         newSlots[emptyIndex] = { modifierId, active: true };
         onSlotsChange(newSlots);
@@ -156,7 +157,7 @@ export const ModifierPanel = ({ slots, allModifiers, onSlotsChange, disabled }: 
             onClick={e => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold">Select Modifiers ({selectedCount}/5)</h3>
+              <h3 className="font-semibold">Select Modifiers ({selectedCount}/{maxSlots})</h3>
               <Button variant="ghost" size="sm" onClick={() => setModalOpen(false)}>
                 <X className="w-4 h-4" />
               </Button>
@@ -165,7 +166,7 @@ export const ModifierPanel = ({ slots, allModifiers, onSlotsChange, disabled }: 
             <div className="grid grid-cols-9 gap-2">
               {allModifiers.map(mod => {
                 const isSelected = slots.some(s => s.modifierId === mod.id);
-                const canSelect = isSelected || selectedCount < 5;
+                const canSelect = isSelected || selectedCount < maxSlots;
                 
                 return (
                   <Button

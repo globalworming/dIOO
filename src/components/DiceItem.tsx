@@ -16,12 +16,13 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
   return (
     <div
       className={cn(
-        "w-full aspect-square rounded-sm flex items-center justify-center transition-all duration-500",
-        "bg-secondary/50  ring ring-4 ring-inset ring-secondary/10",
+        "w-full aspect-square rounded-sm flex items-center justify-center",
+        "bg-secondary/50  ",
         " overflow-hidden",
-        phase === "sorting" && "transition-all duration-700 ease-out",
-        highlighted && "ring-primary/10 bg-secondary/60",
-        consumed && "rounded-full [scale:0.1] ring-0"
+        phase === "sorting" ? "duration-700" : "",
+        highlighted && hasDot && "",
+        highlighted && !hasDot && "bg-background/100",
+        consumed && "rounded-full [scale:0.3]"
       )}
       style={{
         borderColor: modifierColor,
@@ -35,7 +36,7 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
             "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-500",
             highlighted && hasDot && "[scale:2]",
             !modifierColor && "bg-primary",
-            consumed && "[scale:5]" 
+            consumed && "[scale:1]" 
           )}
           style={{
             animationDelay: `${sortedIndex * 20}ms`,

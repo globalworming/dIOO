@@ -1,5 +1,8 @@
 import { Button } from "./ui/button";
 
+/**
+ * FIXME later: change skills so they are only matched on the grid once, but they give points based on their size 
+ */
 export interface Skill {
   id: string;
   name: string;

@@ -36,6 +36,7 @@ const DEFAULT_STATS: GameStats = {
   totalRolls: 0,
   totalModifiedRolls: 0,
   colorTotals: {},
+  maxSlots: 3,
   rolledNumbers: new Set<number>(),
   recentRolls: [],
   inventory: {
@@ -215,6 +216,7 @@ export const useAchievements = () => {
         totalRolls: stats.totalRolls + 1,
         totalModifiedRolls: hasModifiers ? stats.totalModifiedRolls + 1 : stats.totalModifiedRolls,
         colorTotals: newColorTotals,
+        maxSlots: stats.maxSlots,
         rolledNumbers: newRolledNumbers,
         recentRolls: newRecentRolls,
         inventory: newInventory,

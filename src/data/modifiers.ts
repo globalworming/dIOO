@@ -140,9 +140,9 @@ const createBullseye5Zones = (): number[] => {
 
 const createDiagonals1Zones = (): number[] => {
   const zones = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 6; i++) {
     // Main diagonal
-    zones.push(i * 10 + i);
+    zones.push(i * 10 + i - 6);
   }
   return zones;
 };
