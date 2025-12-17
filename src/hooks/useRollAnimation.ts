@@ -109,7 +109,7 @@ export const useRollAnimation = ({
     animationRef.current.timeouts.forEach(clearTimeout);
     animationRef.current.timeouts = [];
 
-    const rolledResult = predeterminedResult ?? rollD100();
+    let rolledResult = predeterminedResult ?? rollD100();
     setResult(null);
     setModifiedResult(null);
     setModifierBonuses([]);
@@ -131,6 +131,7 @@ export const useRollAnimation = ({
         // Phase 2: Generate final items and start sorting
         // Keystones always have dots
         const finalItems = generateItemsWithDots(rolledResult, keystones);
+        rolledResult = Math.max(finalItems.reduce((a, b) => a + (b ? 1 : 0), 0), rolledResult); 
         setItems(finalItems);
         
         // Trigger first keystone roll achievement
