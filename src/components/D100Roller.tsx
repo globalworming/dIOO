@@ -241,8 +241,8 @@ export const D100Roller = () => {
               />
             </div>
           )}
-          {/* Keystone toggle - unlocked after fifty-rolls */}
-          {unlockedDefs.some(d => d.id === "fifty-rolls") && (
+          {/* Keystone toggle*/}
+          {unlockedDefs.some(d => d.id === "keystone-unlockable") && (
             <div className="relative flex justify-center">
               <Button
                 size="icon"

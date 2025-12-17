@@ -83,14 +83,14 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "First Roll",
     description: "Roll the dice for the first time",
     condition: ({ stats }) => stats.totalRolls >= 1,
-    next: ["five-rolls", "ten-rolls", "sum-100"],
+    next: ["five-rolls", "sum-100"],
   },
   {
     id: "five-rolls",
     name: "That's how they get you",
     description: "Roll 5 times",
     condition: ({ stats }) => stats.totalRolls >= 5,
-    next: ["inventory-1"],
+    next: ["inventory-1", "ten-rolls"],
   },
   {
     id: "inventory-1",
@@ -111,7 +111,18 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "Dedicated Roller",
     description: "Roll 50 times",
     condition: ({ stats }) => stats.totalRolls >= 50,
-    next: ["hundred-rolls", "first-keystone"],
+    next: ["hundred-rolls", "keystone-unlockable"],
+  },
+  {
+    id: "keystone-unlockable",
+    name: "Keystones",
+    description: "Use keystones to lock in results",
+    condition: () => false,
+    next: ["first-keystone"],
+    manualUnlockResourceSpent: () => {
+      // This achievement has no further requirements for unlocking manually
+      return {}
+    }
   },
   {
     id: "first-keystone",
