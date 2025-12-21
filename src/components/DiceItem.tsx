@@ -20,17 +20,17 @@ export const DiceItem = ({ hasDot, index, phase, sortedIndex, highlighted, modif
   return (
     <div
       className={cn(
-        "w-full aspect-square rounded-sm flex items-center justify-center",
+        "w-full aspect-square duration-500 rounded-sm flex items-center justify-center",
         "bg-secondary/50  ",
         " overflow-hidden",
-        phase === "sorting" ? "duration-700" : "",
+        phase === "sorting" ? "" : "",
+        highlighted && "bg-muted/50 border-2",
         highlighted && hasDot && "",
-        highlighted && !hasDot && "bg-background/100",
+        highlighted && !hasDot && "",
         consumed && "rounded-full [scale:0.3]",
         onClick && "cursor-pointer hover:bg-secondary/80"
       )}
       style={{
-        borderColor: modifierColor,
         transitionDelay: phase === "sorting" ? `${sortedIndex * 8}ms` : "0ms",
         order: phase === "sorted" || phase === "sorting" || phase === "modifying" || phase === "skilling" ? sortedIndex : index,
         background: isKeystone ? "linear-gradient(10deg, transparent 20%, rgba(128, 128, 128, 0.4) 100%)" : undefined,

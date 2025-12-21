@@ -40,7 +40,11 @@ export const D100Roller = () => {
       // Diagonal progression: diagonal2 when diagonal-1 unlocked, diagonal3 when diagonal-2 unlocked
       if (modifier.id === 'diagonals1' && unlockedIds.has('diagonals-1')) return true;
       if (modifier.id === 'diagonals2' && unlockedIds.has('diagonals-2')) return true;
-      
+      if (modifier.id === 'dots1' && unlockedIds.has('dots-1')) return true;
+      if (modifier.id === 'dots2' && unlockedIds.has('dots-2')) return true;
+      if (modifier.id === 'dots3' && unlockedIds.has('dots-3')) return true;
+      if (modifier.id === 'dots4' && unlockedIds.has('dots-4')) return true;
+      if (modifier.id === 'dots5' && unlockedIds.has('dots-5')) return true;
       return false;
     });
   }, [unlockedDefs]);

@@ -70,7 +70,7 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
   {
     id: "first-unlock",
     name: "Ugh, you gave it free will?",
-    description: "Unlock me. Or don't.",
+    description: "Unlock me. Or don't. Nobody is forcing you to anything here.",
     condition: () => false,
     next: [],
     manualUnlockResourceSpent: () => {
@@ -104,7 +104,7 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "Getting Started",
     description: "Roll 10 times",
     condition: ({ stats }) => stats.totalRolls >= 10,
-    next: ["fifty-rolls", "reach-1", "corners-1", "bullseye-1", "diagonals-1", "waves-1"],
+    next: ["fifty-rolls", "reach-1", "corners-1", "bullseye-1", "diagonals-1", "waves-1", "dots-1"],
   },
   {
     id: "fifty-rolls",
@@ -184,30 +184,8 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "Snake Eyes",
     description: "Roll a natural 1",
     condition: ({ naturalRoll }) => naturalRoll === 1,
-    next: ["reach-100", "reach-2"],
+    next: ["reach-100"],
   },
-  {
-    id: "reach-2",
-    name: "Open your third eye",
-    description: "Roll a natural 2",
-    condition: ({ naturalRoll }) => naturalRoll === 2,
-    next: ["reach-3"],
-  },
-  {
-    id: "reach-3",
-    name: "Now see",
-    description: "Roll a natural 3",
-    condition: ({ naturalRoll }) => naturalRoll === 3,
-    next: Array.from({ length: 100 }, (_, i) => `reach-${i + 1}`).slice(3, -1),
-  },
-  // Generate reach-4 through reach-99
-  ...Array.from({ length: 100 }, (_, i) => ({
-    id: `reach-${i + 1}`,
-    name: `Roll ${i + 1}`,
-    description: `Roll a natural ${i + 1}`,
-    condition: ({ naturalRoll }: AchievementContext) => naturalRoll === i + 1,
-    next: ["reach-all"],
-  })).slice(3, -1),
   {
     id: "reach-100",
     name: "Perfect Roll",
@@ -240,7 +218,7 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
     name: "Stability",
     description: "No need to be on edge. Everything will eventually settle,",
     condition: ({ }) => false,
-    next: ["corners-100", "corners-2"],
+    next: ["corners-2"],
     manualUnlockResourceSpent: () => {
       return  {rolls: 400};
     }
@@ -269,6 +247,67 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
       };
     }
   },
+  {
+    id: "dots-1",
+    name: "Grass Roots",
+    description: "1 + 1 + 1 makes a community",
+    condition: ({ }) => false,
+    next: ["dots-2"],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400, 
+      };
+    }
+  },
+  {
+    id: "dots-2",
+    name: "Grass Roots",
+    description: "1 + 1 + 1 makes a community",
+    condition: ({ }) => false,
+    next: ["dots-3"],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400, 
+        [MODIFIER_THEME_COLORS.dots]: 15,
+      };
+    }
+  },
+  {
+    id: "dots-3",
+    name: "Grass Roots",
+    description: "1 + 1 + 1 makes a community",
+    condition: ({ }) => false,
+    next: ["dots-4"],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400, 
+        [MODIFIER_THEME_COLORS.dots]: 25,
+      };
+    }
+  },
+  {
+    id: "dots-4",
+    name: "Grass Roots",
+    description: "1 + 1 + 1 makes a community",
+    condition: ({ }) => false,
+    next: ["dots-5"],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400, 
+        [MODIFIER_THEME_COLORS.dots]: 50,
+        [MODIFIER_THEME_COLORS.bullseye]: 500,
+      };
+    }
+  },
+  {
+    id: "dots-5",
+    name: "Grass Roots",
+    description: "Communities support each other",
+    condition: ({ }) => false,
+    next: [],
+    manualUnlockResourceSpent: () => {
+      return  {rolls: 400, 
+        [MODIFIER_THEME_COLORS.dots]: 250,
+      };
+    }
+  },
+    
   {
     id: "diagonals-1",
     name: "Righteousness",
