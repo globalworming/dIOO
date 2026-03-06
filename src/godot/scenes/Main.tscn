@@ -1,0 +1,90 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main.gd" id="1_g2v2b"]
+
+[node name="root" type="Control" unique_id=774175647]
+script = ExtResource("1_g2v2b")
+layout_mode = 3
+anchors_preset = 0
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=1713630174]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+
+[node name="ResultLabel" type="Label" parent="VBox" unique_id=2006002025]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 48
+text = "Roll: -"
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="VBox" unique_id=308880401]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Press Roll to play"
+horizontal_alignment = 1
+
+[node name="Grid" type="GridContainer" parent="VBox" unique_id=345125885]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+columns = 10
+
+[node name="Controls" type="HBoxContainer" parent="VBox" unique_id=1399486555]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+
+[node name="RollButton" type="Button" parent="VBox/Controls" unique_id=299176707]
+layout_mode = 2
+text = "Roll"
+
+[node name="AchievementsButton" type="Button" parent="VBox/Controls" unique_id=1811987993]
+layout_mode = 2
+text = "Achievements"
+
+[node name="MilestoneLabel" type="Label" parent="VBox" unique_id=1978157905]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Milestones: none"
+horizontal_alignment = 1
+
+[node name="AchievementsPanel" type="PanelContainer" parent="VBox" unique_id=1553007676]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+
+[node name="PanelVBox" type="VBoxContainer" parent="VBox/AchievementsPanel" unique_id=121509392]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="UnlockedTitle" type="Label" parent="VBox/AchievementsPanel/PanelVBox" unique_id=1579577872]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "Unlocked"
+horizontal_alignment = 1
+
+[node name="UnlockedList" type="ItemList" parent="VBox/AchievementsPanel/PanelVBox" unique_id=2123746361]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+fixed_column_width = 280
+
+[node name="AvailableTitle" type="Label" parent="VBox/AchievementsPanel/PanelVBox" unique_id=199273057]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "Available"
+horizontal_alignment = 1
+
+[node name="AvailableList" type="ItemList" parent="VBox/AchievementsPanel/PanelVBox" unique_id=1235047947]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+fixed_column_width = 280
