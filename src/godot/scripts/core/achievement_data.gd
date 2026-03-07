@@ -8,14 +8,7 @@ const ACHIEVEMENTS: Array[Dictionary] = [
 		"id": "init",
 		"name": "Participation Trophy",
 		"description": "Session initialized.",
-		"next": ["start", "open-achievements"],
-		"manual_cost": {}
-	},
-	{
-		"id": "open-achievements",
-		"name": "There is potential in this one",
-		"description": "Open the achievements panel.",
-		"next": ["first-unlock"],
+		"next": ["start", "first-unlock"],
 		"manual_cost": {}
 	},
 	{

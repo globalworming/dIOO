@@ -2,6 +2,7 @@ class_name DiooGameState
 extends RefCounted
 
 const AchievementDataScript = preload("res://scripts/core/achievement_data.gd")
+const ModifierDataScript = preload("res://scripts/core/modifier_data.gd")
 
 var achievements_by_id: Dictionary = {}
 var unlocked_ids: Dictionary = {}
@@ -14,6 +15,8 @@ var stats := {
 }
 
 var last_roll: int = 0
+var active_modifier_id: String = ""
+var modifier_active: bool = false
 
 func _init() -> void:
 	achievements_by_id = AchievementDataScript.build_map()
@@ -26,18 +29,38 @@ func record_roll(natural_roll: int) -> Array[String]:
 	stats["highest_roll"] = maxi(int(stats["highest_roll"]), natural_roll)
 	return _check_auto_unlocks({"natural_roll": natural_roll})
 
-func open_achievements_panel() -> Array[String]:
-	var unlocked_now: Array[String] = []
-	if _unlock_internal("open-achievements"):
-		unlocked_now.append("open-achievements")
-	return unlocked_now
-
 func unlock_manually(id: String) -> bool:
 	if is_unlocked(id):
 		return false
 	if not get_available_ids().has(id):
 		return false
 	return _unlock_internal(id)
+
+func can_use_modifiers() -> bool:
+	return is_unlocked("ten-rolls")
+
+func get_available_modifier_ids() -> Array[String]:
+	if not can_use_modifiers():
+		return []
+	return ["corners1"]
+
+func set_modifier_active(modifier_id: String, active: bool) -> bool:
+	if not can_use_modifiers():
+		return false
+	if not get_available_modifier_ids().has(modifier_id):
+		return false
+	active_modifier_id = modifier_id
+	modifier_active = active
+	return true
+
+func get_active_modifier() -> Dictionary:
+	if not modifier_active:
+		return {}
+	if active_modifier_id == "":
+		return {}
+	if not ModifierDataScript.has_modifier(active_modifier_id):
+		return {}
+	return ModifierDataScript.get_modifier(active_modifier_id)
 
 func is_unlocked(id: String) -> bool:
 	return unlocked_ids.has(id)

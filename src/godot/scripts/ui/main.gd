@@ -1,29 +1,47 @@
 extends Control
 
 const EngineScript = preload("res://scripts/core/game_engine.gd")
+const UiFormatterScript = preload("res://scripts/ui/ui_state_formatter.gd")
 
 const CELL_SIZE := Vector2(24, 24)
 const CELL_EMPTY_COLOR := Color(0.10, 0.10, 0.10, 1.0)
 const CELL_DOT_COLOR := Color(0.94, 0.94, 0.94, 1.0)
 
-@onready var result_label: Label = $VBox/ResultLabel
-@onready var hint_label: Label = $VBox/HintLabel
-@onready var milestone_label: Label = $VBox/MilestoneLabel
-@onready var grid: GridContainer = $VBox/Grid
-@onready var roll_button: Button = $VBox/Controls/RollButton
-@onready var achievements_button: Button = $VBox/Controls/AchievementsButton
-@onready var achievements_panel: PanelContainer = $VBox/AchievementsPanel
-@onready var unlocked_list: ItemList = $VBox/AchievementsPanel/PanelVBox/UnlockedList
-@onready var available_list: ItemList = $VBox/AchievementsPanel/PanelVBox/AvailableList
+@onready var main_split: HBoxContainer = $MainSplit
+@onready var game_panel: VBoxContainer = $MainSplit/GamePanel
+@onready var result_label: Label = $MainSplit/GamePanel/ResultLabel
+@onready var modified_label: Label = $MainSplit/GamePanel/ModifiedLabel
+@onready var hint_label: Label = $MainSplit/GamePanel/HintLabel
+@onready var milestone_label: Label = $MainSplit/GamePanel/MilestoneLabel
+@onready var grid: GridContainer = $MainSplit/GamePanel/Grid
+@onready var roll_button: Button = $MainSplit/GamePanel/Controls/RollButton
+@onready var modifier_controls: HBoxContainer = $MainSplit/GamePanel/ModifierControls
+@onready var modifier_toggle_button: Button = $MainSplit/GamePanel/ModifierControls/ModifierToggleButton
+@onready var achievements_panel: PanelContainer = $MainSplit/AchievementsPanel
+@onready var panel_vbox: VBoxContainer = $MainSplit/AchievementsPanel/PanelVBox
+@onready var unlocked_list: Label = $MainSplit/AchievementsPanel/PanelVBox/UnlockedList
+@onready var available_list: Label = $MainSplit/AchievementsPanel/PanelVBox/AvailableList
 
 var engine
 var grid_cells: Array[ColorRect] = []
 
 func _ready() -> void:
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	main_split.set_anchors_preset(Control.PRESET_FULL_RECT)
+	main_split.offset_left = 24.0
+	main_split.offset_top = 24.0
+	main_split.offset_right = -24.0
+	main_split.offset_bottom = -24.0
+	game_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	achievements_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	unlocked_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	available_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_update_split_layout()
 	engine = EngineScript.new()
 	_build_grid()
 	roll_button.pressed.connect(_on_roll_pressed)
-	achievements_button.pressed.connect(_on_achievements_pressed)
+	modifier_toggle_button.pressed.connect(_on_modifier_toggle_pressed)
 	_refresh_ui()
 
 func _build_grid() -> void:
@@ -37,20 +55,29 @@ func _build_grid() -> void:
 func _on_roll_pressed() -> void:
 	var roll_out: Dictionary = engine.roll_once()
 	var natural_roll := int(roll_out["natural_roll"])
+	var modified_roll := int(roll_out["modified_roll"])
+	var modifier_bonus := int(roll_out["modifier_bonus"])
 	var items: Array = roll_out["grid"]
 	result_label.text = "Roll: %d" % natural_roll
+	modified_label.text = "Modified: %d (+%d)" % [modified_roll, modifier_bonus]
 	_apply_grid(items)
 	_refresh_ui()
 
-func _on_achievements_pressed() -> void:
-	achievements_panel.visible = not achievements_panel.visible
-	if achievements_panel.visible:
-		engine.state.open_achievements_panel()
+func _on_modifier_toggle_pressed() -> void:
+	var next_active: bool = not engine.state.modifier_active
+	engine.state.set_modifier_active("corners1", next_active)
 	_refresh_ui()
 
 func _apply_grid(items: Array) -> void:
 	for i in range(mini(items.size(), grid_cells.size())):
 		grid_cells[i].color = CELL_DOT_COLOR if bool(items[i]) else CELL_EMPTY_COLOR
+
+func _update_split_layout() -> void:
+	var viewport_width: float = get_viewport_rect().size.x
+	var target_right_width := clampf(viewport_width * 0.48, 700.0, 980.0)
+	achievements_panel.custom_minimum_size.x = target_right_width
+	game_panel.size_flags_stretch_ratio = 1.0
+	achievements_panel.size_flags_stretch_ratio = 1.0
 
 func _refresh_ui() -> void:
 	var state = engine.state
@@ -58,26 +85,19 @@ func _refresh_ui() -> void:
 	var unlocked_defs: Array[Dictionary] = state.get_unlocked_defs()
 	var available_defs: Array[Dictionary] = state.get_available_defs()
 
-	unlocked_list.clear()
-	for def in unlocked_defs:
-		unlocked_list.add_item("%s: %s" % [def["id"], def["name"]])
+	var unlocked_lines: Array[String] = UiFormatterScript.format_achievement_lines(unlocked_defs)
+	var available_lines: Array[String] = UiFormatterScript.format_achievement_lines(available_defs)
+	unlocked_list.text = "\n".join(unlocked_lines)
+	available_list.text = "\n".join(available_lines)
 
-	available_list.clear()
-	for def in available_defs:
-		available_list.add_item("%s: %s" % [def["id"], def["name"]])
-
-	achievements_button.text = "Achievements (%d/%d)" % [unlocked_defs.size(), state.get_total_achievement_count()]
+	modifier_controls.visible = state.can_use_modifiers()
+	modifier_toggle_button.text = "Corners I: %s" % ("ON" if state.modifier_active else "OFF")
 	milestone_label.text = "Milestones: start=%s  five=%s  ten=%s" % [
 		"yes" if state.is_unlocked("start") else "no",
 		"yes" if state.is_unlocked("five-rolls") else "no",
 		"yes" if state.is_unlocked("ten-rolls") else "no"
 	]
-
-	if total_rolls == 0:
-		hint_label.text = "Press Roll to play."
-	elif not state.is_unlocked("open-achievements"):
-		hint_label.text = "Open achievements for direction."
-	elif not state.is_unlocked("ten-rolls"):
-		hint_label.text = "Keep rolling to reach the next milestone."
-	else:
-		hint_label.text = "Stage Pack 1 baseline reached."
+	hint_label.text = UiFormatterScript.build_hint_text(
+		total_rolls,
+		state.is_unlocked("ten-rolls")
+	)

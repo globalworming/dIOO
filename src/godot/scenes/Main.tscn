@@ -1,90 +1,120 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://cktavwmym7x70"]
 
-[ext_resource type="Script" path="res://scripts/ui/main.gd" id="1_g2v2b"]
+[ext_resource type="Script" uid="uid://cbjg2w4epq7w5" path="res://scripts/ui/main.gd" id="1_g2v2b"]
 
 [node name="root" type="Control" unique_id=774175647]
-script = ExtResource("1_g2v2b")
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_g2v2b")
 
-[node name="VBox" type="VBoxContainer" parent="." unique_id=1713630174]
-layout_mode = 0
+[node name="MainSplit" type="HBoxContainer" parent="." unique_id=1269511331]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = 24.0
 offset_top = 24.0
 offset_right = -24.0
 offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
 
-[node name="ResultLabel" type="Label" parent="VBox" unique_id=2006002025]
+[node name="GamePanel" type="VBoxContainer" parent="MainSplit" unique_id=1713630174]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ResultLabel" type="Label" parent="MainSplit/GamePanel" unique_id=2006002025]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 48
 text = "Roll: -"
 horizontal_alignment = 1
 
-[node name="HintLabel" type="Label" parent="VBox" unique_id=308880401]
+[node name="ModifiedLabel" type="Label" parent="MainSplit/GamePanel" unique_id=101105968]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "Modified: -"
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="MainSplit/GamePanel" unique_id=308880401]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Press Roll to play"
 horizontal_alignment = 1
 
-[node name="Grid" type="GridContainer" parent="VBox" unique_id=345125885]
+[node name="Grid" type="GridContainer" parent="MainSplit/GamePanel" unique_id=345125885]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 size_flags_vertical = 4
 columns = 10
 
-[node name="Controls" type="HBoxContainer" parent="VBox" unique_id=1399486555]
+[node name="Controls" type="HBoxContainer" parent="MainSplit/GamePanel" unique_id=1399486555]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 alignment = 1
 
-[node name="RollButton" type="Button" parent="VBox/Controls" unique_id=299176707]
+[node name="RollButton" type="Button" parent="MainSplit/GamePanel/Controls" unique_id=299176707]
 layout_mode = 2
 text = "Roll"
 
-[node name="AchievementsButton" type="Button" parent="VBox/Controls" unique_id=1811987993]
+[node name="ModifierControls" type="HBoxContainer" parent="MainSplit/GamePanel" unique_id=638111657]
+visible = false
 layout_mode = 2
-text = "Achievements"
+size_flags_horizontal = 3
+alignment = 1
 
-[node name="MilestoneLabel" type="Label" parent="VBox" unique_id=1978157905]
+[node name="ModifierToggleButton" type="Button" parent="MainSplit/GamePanel/ModifierControls" unique_id=1793438444]
 layout_mode = 2
-size_flags_horizontal = 4
+text = "Corners I: OFF"
+
+[node name="MilestoneLabel" type="Label" parent="MainSplit/GamePanel" unique_id=1978157905]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Milestones: none"
 horizontal_alignment = 1
 
-[node name="AchievementsPanel" type="PanelContainer" parent="VBox" unique_id=1553007676]
-visible = false
+[node name="AchievementsPanel" type="PanelContainer" parent="MainSplit" unique_id=1553007676]
+custom_minimum_size = Vector2(720, 0)
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PanelVBox" type="VBoxContainer" parent="VBox/AchievementsPanel" unique_id=121509392]
+[node name="PanelVBox" type="VBoxContainer" parent="MainSplit/AchievementsPanel" unique_id=121509392]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 size_flags_vertical = 4
 
-[node name="UnlockedTitle" type="Label" parent="VBox/AchievementsPanel/PanelVBox" unique_id=1579577872]
+[node name="UnlockedTitle" type="Label" parent="MainSplit/AchievementsPanel/PanelVBox" unique_id=1579577872]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
 text = "Unlocked"
 horizontal_alignment = 1
 
-[node name="UnlockedList" type="ItemList" parent="VBox/AchievementsPanel/PanelVBox" unique_id=2123746361]
+[node name="UnlockedList" type="Label" parent="MainSplit/AchievementsPanel/PanelVBox" unique_id=2123746361]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 size_flags_vertical = 3
-fixed_column_width = 280
+text = "(none)"
+autowrap_mode = 2
 
-[node name="AvailableTitle" type="Label" parent="VBox/AchievementsPanel/PanelVBox" unique_id=199273057]
+[node name="AvailableTitle" type="Label" parent="MainSplit/AchievementsPanel/PanelVBox" unique_id=199273057]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
 text = "Available"
 horizontal_alignment = 1
 
-[node name="AvailableList" type="ItemList" parent="VBox/AchievementsPanel/PanelVBox" unique_id=1235047947]
+[node name="AvailableList" type="Label" parent="MainSplit/AchievementsPanel/PanelVBox" unique_id=1235047947]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 size_flags_vertical = 3
-fixed_column_width = 280
+text = "(none)"
+autowrap_mode = 2
