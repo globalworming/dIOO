@@ -21,15 +21,6 @@ static func _ensure_cache() -> void:
 			"id": "corners1",
 			"name": "Corners I",
 			"zones": _create_corners1_zones()
-		},
-		"3square_corners": {
-			"id": "3square_corners",
-			"name": "3x3 Corners",
-			"zones": [
-				1,0,1,
-				0,0,0,
-				1,0,1
-			]
 		}
 
 	}

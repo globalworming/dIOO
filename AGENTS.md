@@ -1,42 +1,24 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
-- App source lives in `src/`.
-- Route-level pages are in `src/pages/` (`Index.tsx`, `DebugModifiers.tsx`, `NotFound.tsx`).
-- Reusable UI components are in `src/components/`; shadcn primitives are in `src/components/ui/`.
-- State and behavior helpers are split across `src/hooks/`, `src/utils/`, and `src/lib/`.
-- Static game/config data is in `src/data/`.
-- Public static assets are in `public/`.
+## Project
+- App source lives in `src/` and are currently migrated to `src/godot` with focus on `spec.md` adherence and test driven development
+- static data like achievements names, unlock order, patterns and colors can be used as is. data structure is allowed to change
+- godot mcp is available
 
-## Build, Test, and Development Commands
-- `npm run dev`: Start Vite dev server with hot reload.
-- `npm run build`: Create a production bundle in `dist/`.
-- `npm run build:dev`: Build using development mode flags.
-- `npm run preview`: Serve the built output locally.
-- `npm run lint`: Run ESLint across `*.ts` and `*.tsx`.
+## TODO 
 
-## Coding Style & Naming Conventions
-- Use TypeScript + React functional components.
-- Use 2-space indentation and keep files ASCII unless existing content requires otherwise.
-- Name components and page files in `PascalCase` (`DiceGrid.tsx`), hooks in `camelCase` with `use` prefix (`useAchievements.ts`), and utility modules in `camelCase` (`gameLogic.ts`).
-- Prefer path aliases over deep relative imports: `@/components`, `@/hooks`, `@/lib`, `@/utils`.
-- Tailwind is the default styling approach; keep shared tokens in `src/index.css` and `tailwind.config.ts`.
+### now
 
-## Testing Guidelines
-- There is no dedicated automated test suite configured yet.
-- Minimum validation for each change: run `npm run lint` and `npm run build`.
-- For behavior changes, verify flows in `npm run dev` and document manual test steps in the PR.
-- When adding tests later, place them near the feature (`src/**/__tests__`) and use `*.test.ts(x)` naming.
+-  [ ] the generic dictionary achievements are hard to maintain. plan two likely but different implementation paths
 
-## Commit & Pull Request Guidelines
-- Follow the repository’s existing commit style: short, imperative summaries (for example, `add keystone system`, `gate keystone feature`).
-- Keep commits scoped to one logical change.
-- PRs must include:
-  - What changed and why.
-  - Linked issue/task when available.
-  - Screenshots or short recordings for UI updates.
-  - Manual validation steps and commands run (`npm run lint`, `npm run build`).
+### next
 
-## Configuration Notes
-- TypeScript is intentionally non-strict in this repo; do not enable strict flags in unrelated work.
-- ESLint disables `@typescript-eslint/no-unused-vars`; remove dead code intentionally instead of relying on lint errors.
+- [ ] only some achievements can be unlocked manually, currently all show a "unlock"
+- [ ] where we have classes (e.g. engine state) we need to put proper types on the variables
+
+
+### later
+
+- [ ] let automated run check "clicks till achievement" and "rolls till achievement" 
+- [ ] display "rolls till achievement" that for each achievement unlockable
+- polish

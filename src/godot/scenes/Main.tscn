@@ -112,9 +112,7 @@ theme_override_font_sizes/font_size = 20
 text = "Available"
 horizontal_alignment = 1
 
-[node name="AvailableList" type="Label" parent="MainSplit/AchievementsPanel/PanelVBox" unique_id=1235047947]
+[node name="AvailableList" type="VBoxContainer" parent="MainSplit/AchievementsPanel/PanelVBox" unique_id=1235047947]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-text = "(none)"
-autowrap_mode = 2

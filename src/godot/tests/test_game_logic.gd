@@ -8,7 +8,7 @@ func run() -> int:
 	_failures = 0
 	_test_initial_tree_state()
 	_test_first_roll_unlocks_start()
-	_test_manual_branch_is_available_from_start()
+	_test_manual_unlock_unlocks_achievement()
 	_test_milestones_unlock_at_expected_roll_counts()
 	_test_modifier_activation_gated_by_ten_rolls()
 	_test_modifier_bonus_applies_after_activation()
@@ -37,11 +37,17 @@ func _test_first_roll_unlocks_start() -> void:
 			dot_count += 1
 	_assert_eq(dot_count, 42, "grid should contain exactly the rolled number of dots")
 
-func _test_manual_branch_is_available_from_start() -> void:
+func _test_manual_unlock_unlocks_achievement() -> void:
 	var engine = EngineScript.new()
+	var available_before: Array[String] = engine.state.get_available_ids()
+	_assert_true(available_before.has("first-unlock"), "first-unlock should be available before manual unlock")
+	_assert_true(not engine.state.is_unlocked("first-unlock"), "first-unlock should start locked")
+
 	var unlocked: bool = engine.state.unlock_manually("first-unlock")
 	_assert_true(unlocked, "first-unlock should be manually unlockable at session start")
 	_assert_true(engine.state.is_unlocked("first-unlock"), "first-unlock should stay unlocked once acquired")
+	var available_after: Array[String] = engine.state.get_available_ids()
+	_assert_true(not available_after.has("first-unlock"), "first-unlock should leave available list after unlock")
 
 func _test_milestones_unlock_at_expected_roll_counts() -> void:
 	var engine = EngineScript.new()

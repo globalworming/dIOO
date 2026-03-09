@@ -1,6 +1,7 @@
 extends Control
 
 const EngineScript = preload("res://scripts/core/game_engine.gd")
+const AchievementDataScript = preload("res://scripts/core/achievement_data.gd")
 const UiFormatterScript = preload("res://scripts/ui/ui_state_formatter.gd")
 
 const CELL_SIZE := Vector2(24, 24)
@@ -20,9 +21,9 @@ const CELL_DOT_COLOR := Color(0.94, 0.94, 0.94, 1.0)
 @onready var achievements_panel: PanelContainer = $MainSplit/AchievementsPanel
 @onready var panel_vbox: VBoxContainer = $MainSplit/AchievementsPanel/PanelVBox
 @onready var unlocked_list: Label = $MainSplit/AchievementsPanel/PanelVBox/UnlockedList
-@onready var available_list: Label = $MainSplit/AchievementsPanel/PanelVBox/AvailableList
+@onready var available_list: VBoxContainer = $MainSplit/AchievementsPanel/PanelVBox/AvailableList
 
-var engine
+var engine: DiooGameEngine
 var grid_cells: Array[ColorRect] = []
 
 func _ready() -> void:
@@ -86,9 +87,8 @@ func _refresh_ui() -> void:
 	var available_defs: Array[Dictionary] = state.get_available_defs()
 
 	var unlocked_lines: Array[String] = UiFormatterScript.format_achievement_lines(unlocked_defs)
-	var available_lines: Array[String] = UiFormatterScript.format_achievement_lines(available_defs)
 	unlocked_list.text = "\n".join(unlocked_lines)
-	available_list.text = "\n".join(available_lines)
+	_rebuild_available_rows(available_defs)
 
 	modifier_controls.visible = state.can_use_modifiers()
 	modifier_toggle_button.text = "Corners I: %s" % ("ON" if state.modifier_active else "OFF")
@@ -101,3 +101,40 @@ func _refresh_ui() -> void:
 		total_rolls,
 		state.is_unlocked("ten-rolls")
 	)
+
+func _rebuild_available_rows(available_defs: Array[Dictionary]) -> void:
+	for child in available_list.get_children():
+		available_list.remove_child(child)
+		child.queue_free()
+
+	if available_defs.is_empty():
+		var placeholder := Label.new()
+		placeholder.text = "(none)"
+		available_list.add_child(placeholder)
+		return
+
+	for def in available_defs:
+		var achievement_id := String(def["id"])
+		var row := HBoxContainer.new()
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+		var entry_label := Label.new()
+		entry_label.text = "%s: %s" % [achievement_id, String(def["name"])]
+		entry_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		entry_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row.add_child(entry_label)
+
+		if _is_manual_unlockable(achievement_id):
+			var unlock_button := Button.new()
+			unlock_button.text = "Unlock"
+			unlock_button.pressed.connect(_on_manual_unlock_pressed.bind(achievement_id))
+			row.add_child(unlock_button)
+
+		available_list.add_child(row)
+
+func _is_manual_unlockable(achievement_id: String) -> bool:
+	return not AchievementDataScript.is_auto_unlockable(achievement_id, engine.state.stats, {})
+
+func _on_manual_unlock_pressed(achievement_id: String) -> void:
+	engine.state.unlock_manually(achievement_id)
+	_refresh_ui()
